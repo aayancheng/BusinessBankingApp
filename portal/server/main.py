@@ -12,9 +12,11 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from portal.server import service
+from portal.server import pricing_service
 from portal.server.schemas import (
     AdjudicationDetail, DecideRequest, HealthResponse,
     PaginatedApplications, SegmentsResponse,
+    PricingDetail, QuoteRequest, QuoteResponse, PricingPortfolio,
 )
 
 
@@ -27,6 +29,7 @@ async def lifespan(app: FastAPI):
     app.state.explainer = explainer
     app.state.baseline = service.baseline_row()
     app.state.pop = service.score_population(model, config, explainer)
+    app.state.pricing_pop = pricing_service.load_population()
     yield
 
 
@@ -75,3 +78,21 @@ def detail(business_id: str):
 def decide_endpoint(req: DecideRequest):
     return service.decide_one(req.model_dump(), app.state.baseline,
                               app.state.model, app.state.config, app.state.explainer)
+
+
+@app.get("/api/pricing/portfolio", response_model=PricingPortfolio)
+def pricing_portfolio():
+    return pricing_service.portfolio(app.state.pricing_pop)
+
+
+@app.post("/api/pricing/quote", response_model=QuoteResponse)
+def pricing_quote(req: QuoteRequest):
+    return pricing_service.quote(req.model_dump())
+
+
+@app.get("/api/pricing/{business_id}", response_model=PricingDetail)
+def pricing_detail(business_id: str):
+    rec = pricing_service.detail_record(business_id, app.state.pricing_pop)
+    if rec is None:
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
+    return rec

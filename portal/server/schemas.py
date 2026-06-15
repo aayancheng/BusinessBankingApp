@@ -89,3 +89,71 @@ class HealthResponse(BaseModel):
     n_applicants: int
     model_auc: float
     top20_lift: float
+
+
+# --- Pricing (Module 2) ---
+class WaterfallLine(BaseModel):
+    interest_income: float
+    cost_of_funds: float
+    expected_loss: float
+    operating_cost: float
+    pre_tax_profit: float
+    tax: float
+    net_income: float
+    allocated_equity: float
+    roe: float
+    raroc: float
+
+
+class PricingDetail(BaseModel):
+    business_id: str
+    industry: str
+    pd: float
+    ead: float
+    quoted_rate: float
+    recommended_rate: float
+    hurdle_clearing_rate: float
+    roe_at_quoted: float
+    raroc_at_quoted: float
+    roe_at_recommended: float
+    clears_hurdle: bool
+    mispriced: bool
+    rate_shortfall: float
+    waterfall_quoted: WaterfallLine
+
+
+class QuoteRequest(BaseModel):
+    pd: float = 0.05
+    ead: float = 150000.0
+    rate: float = 0.12
+    cost_of_funds: float | None = None
+    lgd: float | None = None
+    opex_rate: float | None = None
+    tax_rate: float | None = None
+    capital_ratio: float | None = None
+    fee_rate: float | None = None
+
+
+class QuoteResponse(BaseModel):
+    roe: float
+    raroc: float
+    clears_hurdle: bool
+    roe_hurdle: float
+    waterfall: WaterfallLine
+
+
+class PricingSegmentRow(BaseModel):
+    key: str
+    mispriced_rate: float
+    count: int
+
+
+class PricingPortfolio(BaseModel):
+    n: int
+    n_clears: int
+    share_clears: float
+    median_roe: float
+    mispriced_ead: float
+    roe_hurdle: float
+    by_band: list[PricingSegmentRow]
+    by_industry: list[PricingSegmentRow]
