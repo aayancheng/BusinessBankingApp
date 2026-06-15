@@ -84,6 +84,7 @@ class SegmentsResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
     status: str
     n_applicants: int
     model_auc: float

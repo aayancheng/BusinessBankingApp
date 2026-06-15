@@ -16,7 +16,7 @@ from adjudication.src.feature_engineering import (
 from adjudication.src.policy import PolicyConfig, decide
 from adjudication.src.reason_codes import top_adverse_shap
 
-MODELS = Path("adjudication/models")
+MODELS = Path(__file__).resolve().parent.parent.parent / "adjudication" / "models"
 KEY_RATIO_COLS = ["dscr", "leverage", "current_ratio", "utilization", "debt_to_income"]
 
 
