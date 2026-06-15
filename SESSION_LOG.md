@@ -164,3 +164,63 @@ backend phase. `leverage>6.0` knockout never fires on this data (candidate to dr
 Phase 0/Score review→merge flow). Branch `build/adjudication`.
 
 **Resume:** open `BusinessBankingApp` and say "resume the business banking build".
+
+---
+
+## Session 3 (cont.) — 2026-06-15 — Module 1 Adjudication PORTAL
+
+**Scope (user-confirmed):** Adjudication slice on an extensible portal scaffold; **Vite-direct
+proxy** (no Express). Brainstorm → sub-spec → plan → subagent-driven build (7 tasks P1–P7),
+one implementer + one combined spec+quality reviewer per task.
+
+**Built:**
+- **Backend `portal/server/`** — FastAPI with a lifespan that loads the scorecard +
+  adjudication model + policy config once, scores all 12k applicants (incl. SHAP reason
+  codes) into `app.state`. 5 routes: `/health`, `/api/adjudication/applications`
+  (paginated items/pages, decision filter), `/api/adjudication/{id}` (detail, fields
+  top-level), `POST /api/adjudication/decide` (live What-If), `/api/adjudication/segments`.
+  `service.py` only orchestrates Module 1 code (no logic duplicated). **6 API tests.**
+- **Frontend `portal/client/`** — Vite + React + Tailwind + Recharts. 10 presentational
+  components (Sidebar with other modules as disabled stubs, DecisionBadge, SliderControl,
+  ReasonList, …), 4 views (Lookup / What-If / Segments / Dashboard), data layer (api/hooks/
+  constants). Vite proxies `/api` → FastAPI:8100.
+- **Playwright gate** — `playwright.config.js` boots uvicorn + Vite via `webServer`; 3
+  headless smoke tests (lookup shows a decision badge; What-If `slider-dscr`→0.4 flips to
+  Decline; Segments renders a chart). Runs as a single `npx playwright test`.
+
+**Gates:** **46/46 backend pytest** (40 prior + 6 API), **3/3 Playwright**, **`vite build` ok**.
+
+**Subagent token tally (portal phase) — for evaluating the subagent design:**
+
+| Task | Role | Model | Tokens | Outcome |
+|------|------|-------|-------:|---------|
+| P1 backend | impl | sonnet | 43,814 | DONE → APPROVED (+3 controller fixes) |
+| P1 backend | review | sonnet | 60,534 | APPROVED (3 minor: pydantic ns, abs path, stale file) |
+| P2 API tests | impl | sonnet | 38,553 | DONE → APPROVED |
+| P2 API tests | review | haiku | 43,700 | APPROVED |
+| P3 client scaffold | impl | sonnet | 41,244 | DONE → APPROVED |
+| P3 client scaffold | review | haiku | 48,974 | APPROVED |
+| P4 components | impl | sonnet | 48,641 | DONE → APPROVED (+3 controller fixes) |
+| P4 components | review | sonnet | 31,376 | APPROVED (3 minor robustness) |
+| P5 views + App | impl | sonnet | 52,685 | DONE |
+| P5 views + App | review | sonnet | 49,159 | CHANGES REQ → controller-fixed (debounce cleanup, testid) |
+| P6 Playwright | impl | sonnet | 39,593 | DONE → APPROVED |
+| P6 Playwright | review | sonnet | 36,524 | APPROVED (independently re-ran gate, 3 passed) |
+
+- **Portal total: 534,797 tokens / 12 dispatches** (impl 264,530 + review 270,267).
+- By model: sonnet 442,123 (10), haiku 92,674 (2).
+- 11/12 clean; 1 changes-requested (P5) fixed inline by the controller. Two APPROVED tasks
+  also got small controller-applied review nits (P1, P4) — all trivial, well-specified.
+- **Combined session total (backend + portal): 942,026 tokens / 26 dispatches.**
+- **Design takeaways:** (a) front-end tasks ran more expensive than the backend ML tasks —
+  reviews that actually compile/boot the app (P1, P5, P6 re-running the gate) cost the most
+  but caught the only real CHANGES-REQUESTED items, so the spend tracked value. (b) Using
+  haiku for transcription-heavy review (P2, P3) saved ~40% vs sonnet with no quality loss.
+  (c) Shipping complete backend code + config in the plan but only contracts+testids for the
+  React layer worked well: implementers adapted the m03_churn reference for idiomatic UI
+  while the testid contracts kept the Playwright gate stable across the component/view split.
+
+**Status:** Module 1 fully complete (backend + portal). **Awaiting user review before merge to
+`main`** (mirrors prior phases). Branch `build/adjudication`.
+
+**Resume:** open `BusinessBankingApp` and say "resume the business banking build".
