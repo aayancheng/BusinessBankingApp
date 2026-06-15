@@ -1,4 +1,4 @@
-export default function SliderControl({ testid, label, value, min, max, step, onChange }) {
+export default function SliderControl({ testid, label, value, min, max, step = 1, onChange }) {
   const displayValue =
     typeof value === 'number' && step < 1 ? value.toFixed(2) : value;
 

@@ -29,7 +29,7 @@ export default function Sidebar({ activeView, onNavigate }) {
           <button
             key={id}
             data-testid={`nav-${id}`}
-            onClick={() => onNavigate(id)}
+            onClick={() => onNavigate?.(id)}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
               activeView === id
                 ? 'bg-white/15 border-l-2 border-emerald-400 text-white'

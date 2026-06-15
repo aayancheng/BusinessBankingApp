@@ -1,4 +1,4 @@
-export default function DataTable({ columns = [], rows = [], onRowClick }) {
+export default function DataTable({ columns = [], rows = [], onRowClick, rowKey = 'id' }) {
   if (!rows || rows.length === 0) {
     return <p className="text-sm text-slate-400 py-4 text-center">No data available.</p>;
   }
@@ -21,7 +21,7 @@ export default function DataTable({ columns = [], rows = [], onRowClick }) {
         <tbody>
           {rows.map((row, i) => (
             <tr
-              key={i}
+              key={row[rowKey] ?? i}
               data-testid="app-row"
               onClick={() => onRowClick && onRowClick(row)}
               className={`border-b border-slate-100 cursor-pointer transition-colors hover:bg-slate-50 ${
