@@ -93,3 +93,74 @@ status board, and start Module 1.
 2. Write the Adjudication sub-spec + plan (LightGBM default model + policy decision layer
    Approve/Refer/Decline + reason codes), then build subagent-driven on a new branch
    `build/adjudication`.
+
+---
+
+## Session 3 — 2026-06-15 — Module 1 Loan Adjudication (BACKEND)
+
+**Scope (user-confirmed):** backend only — LightGBM default model + SHAP + policy
+decision layer (Approve/Refer/Decline) + reason codes + metric gate + tests. Portal
+(FastAPI + React 3-view UI) and Playwright deferred to a follow-up session.
+
+**Process:** brainstorming → sub-spec → implementation plan → **subagent-driven
+development** on branch `build/adjudication` (8 tasks; per task: 1 implementer + 1
+combined spec+quality reviewer; cheap model for mechanical tasks, standard for
+integration/trainer).
+
+**Built:**
+- `shared/config.py`: `LEAKAGE_COLUMNS` deny-list + `ADJ_POLICY` seed thresholds.
+- `score/src/predict.py`: reusable `predict_score_pd` (modeled score/PD for downstream
+  modules; np.errstate guard fixed the carried-over matmul-overflow nit).
+- `adjudication/src/feature_engineering.py`: 21 leakage-free features (app + ratios +
+  bureau + reused business_score/pd_score), leakage assertion.
+- `adjudication/src/policy.py`: `PolicyConfig` + vectorized `decide()` — hard knockouts →
+  PD zones → refer overrides; knockouts always win; overrides only downgrade Approve.
+- `adjudication/src/reason_codes.py`: top adverse SHAP + policy rule hits → `explain()`.
+- `adjudication/src/train.py`: LightGBM, PD-zone calibration, artifacts, **gate assert**.
+
+**Metrics (test split):** **AUC = 0.8096** (gate ≥0.78), **top-20% lift = 2.86×**
+(gate ≥2.0) — passed on the first run, no tuning. PD zones t_low=0.0955, t_high=0.4943.
+Decision mix: Approve 30.8% / Refer 36.8% / Decline 32.4%. **40/40 tests pass**
+(added `adjudication/tests` to `pytest.ini testpaths`).
+
+**Carry-forward:** the conservative decision mix is driven by hard knockouts
+(`dscr<1.0` fires on ~21% of synthetic applicants; `public_records>0` ~8%), NOT the PD
+calibration — moving t_low/t_high shifts the mix <2pp. To better match the ~70%
+historical book intent in a future iteration, regenerate the synthetic DGP with lower
+`dscr<1.0` prevalence (~8–10%) or make knockouts configurable. Out of scope for the
+backend phase. `leverage>6.0` knockout never fires on this data (candidate to drop/retune).
+
+**Subagent token tally (this session) — for evaluating the subagent design:**
+
+| Task | Role | Model | Tokens | Outcome |
+|------|------|-------|-------:|---------|
+| 1 config | impl | haiku | 26,815 | DONE → APPROVED |
+| 1 config | review | haiku | 26,196 | APPROVED |
+| 2 predict.py | impl | sonnet | 27,440 | DONE |
+| 2 predict.py | review | sonnet | 30,364 | CHANGES REQ (overflow guard, unused import) |
+| 3 features | impl | sonnet | 26,210 | DONE → APPROVED |
+| 3 features | review | sonnet | 32,968 | APPROVED |
+| 4 policy | impl | haiku | 27,129 | DONE → APPROVED |
+| 4 policy | review | haiku | 41,066 | APPROVED |
+| 5 reason codes | impl | haiku | 22,539 | DONE → APPROVED |
+| 5 reason codes | review | haiku | 30,105 | APPROVED |
+| 6 trainer+gate | impl | sonnet | 29,838 | DONE → APPROVED (gate pass 1st run) |
+| 6 trainer+gate | review | sonnet | 34,738 | APPROVED (decision-mix analysis) |
+| 7 gate test | impl | haiku | 27,009 | DONE → APPROVED |
+| 7 gate test | review | haiku | 24,812 | APPROVED |
+
+- **Total: 407,229 tokens across 14 dispatches** (7 impl 186,980 + 7 review 220,249).
+- By model: haiku 225,671 (8 dispatches), sonnet 181,558 (6 dispatches).
+- 13/14 dispatches clean; 1 changes-requested (Task 2) fixed by controller inline (2-line
+  edit — too small to justify a re-dispatch; verified with `-W error::RuntimeWarning`).
+- Observations for future automation: (a) reviews cost more than implementations here
+  (220k vs 187k) because the plan shipped complete code, making implementers near-
+  transcription; consider lighter review for full-code-spec tasks. (b) Combined spec+
+  quality review (vs two separate dispatches) ~halved review count with no quality loss.
+  (c) The one high-value review catch (Task 6 decision-mix root-cause) came from the
+  trainer task — spend review budget where there's genuine judgment, not on transcription.
+
+**Status:** Backend complete, **awaiting user review before merge to `main`** (mirrors the
+Phase 0/Score review→merge flow). Branch `build/adjudication`.
+
+**Resume:** open `BusinessBankingApp` and say "resume the business banking build".
