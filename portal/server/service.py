@@ -2,12 +2,17 @@
 this only orchestrates feature engineering + model + policy + reason codes."""
 from __future__ import annotations
 import json
+import warnings
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
 import shap
+
+# SHAP/LightGBM version skew emits a cosmetic UserWarning during TreeExplainer scoring;
+# correctness is unaffected, so keep the server/test output clean.
+warnings.filterwarnings("ignore", category=UserWarning, module="shap")
 
 from shared.config import RAW
 from adjudication.src.feature_engineering import (
