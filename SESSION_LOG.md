@@ -74,3 +74,22 @@ review at phase boundary) on branch `build/phase0-score`.
   cumulative ~400k across 10 subagent dispatches.
 - **Next:** Phase Adjudication (Module 1).
 - **Resume:** open `BusinessBankingApp` and say "resume the business banking build".
+
+---
+
+## ⏸️ PAUSED — 2026-06-14 (resume 2026-06-15, fresh session)
+
+**Milestone merged to `main`** (merge commit `fce144a`): Phase 0 Foundation + Module 0
+Business Credit Score — both complete, reviewed (APPROVED_WITH_NITS, no must-fix), 17/17 tests green.
+
+**To resume tomorrow:** open the `BusinessBankingApp` workspace and say
+**"resume the business banking build"**. Claude will read `program_state.json`
+(`completed_phases: [foundation, score]`, `next_action` = Phase Adjudication), print the
+status board, and start Module 1.
+
+**First steps for Adjudication (Module 1):**
+1. Add a shared `LEAKAGE_COLUMNS` deny-list to `shared/config.py` (pd_default_origination,
+   default, risk_based_rate, booked, deterioration_next_6_12mo, line_increase_good).
+2. Write the Adjudication sub-spec + plan (LightGBM default model + policy decision layer
+   Approve/Refer/Decline + reason codes), then build subagent-driven on a new branch
+   `build/adjudication`.

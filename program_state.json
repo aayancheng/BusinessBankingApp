@@ -13,7 +13,10 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "next_action": "Phase Adjudication — LightGBM default model + policy decision layer (Approve/Refer/Decline) + reason codes + portal module. Add shared LEAKAGE_COLUMNS deny-list to shared/config.py first.",
+  "session_status": "PAUSED 2026-06-14 — Phase 0 (Foundation) + Module 0 (Business Credit Score) complete, reviewed, and merged to main. Branch build/phase0-score merged via fce144a. Resume tomorrow (2026-06-15) with Phase Adjudication in a fresh session.",
+  "resume_command": "Open the BusinessBankingApp workspace and say: resume the business banking build",
+  "completed_phases": ["foundation", "score"],
+  "next_action": "Phase Adjudication — LightGBM default model + policy decision layer (Approve/Refer/Decline) + reason codes + portal module. FIRST add shared LEAKAGE_COLUMNS deny-list to shared/config.py (exclude pd_default_origination, default, risk_based_rate, booked, deterioration_next_6_12mo, line_increase_good). Write the Adjudication sub-spec + plan, then build subagent-driven on a new branch build/adjudication.",
   "phases": [
     {
       "id": "foundation",
