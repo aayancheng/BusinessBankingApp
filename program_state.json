@@ -13,19 +13,32 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "next_action": "Phase 0 — scaffold workspace + build synthetic SME data generator",
+  "next_action": "Phase Score — feature engineering + WoE/Logistic scorecard training (metric gate AUC>=0.75, KS>=0.30)",
   "phases": [
     {
       "id": "foundation",
       "title": "Workspace scaffold + shared synthetic SME data",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
-        { "id": "venv",     "desc": "Create .venv + requirements.txt", "done": false },
-        { "id": "scaffold", "desc": "Create folder tree + CLAUDE.md + README", "done": false },
-        { "id": "datagen",  "desc": "Synthetic SME panel generator (12k businesses, 24mo panel)", "done": false },
-        { "id": "eda",      "desc": "EDA notebook + data dictionary", "done": false }
+        { "id": "venv",     "desc": "Create .venv + requirements.txt", "done": true },
+        { "id": "scaffold", "desc": "Create folder tree + CLAUDE.md + central config", "done": true },
+        { "id": "datagen",  "desc": "Synthetic SME panel generator (12k businesses, 24mo panel)", "done": true },
+        { "id": "eda",      "desc": "EDA cell-script + data dictionary", "done": true }
       ],
-      "metrics": {}, "artifacts": [], "completed_at": null
+      "metrics": {
+        "businesses_rows": 12000, "default_rate": 0.167, "booked_rate": 0.695,
+        "portfolio_accounts": 8336, "deterioration_rate": 0.180, "line_increase_rate": 0.229,
+        "panel_rows": 200064, "panel_months": 24, "tests_passed": 8
+      },
+      "artifacts": [
+        "shared/data/raw/businesses.parquet",
+        "shared/data/raw/portfolio.parquet",
+        "shared/data/raw/panel.parquet",
+        "score/docs/data_dictionary.md",
+        "score/notebooks/01_eda_score.py"
+      ],
+      "completed_at": "2026-06-14",
+      "review": "APPROVED_WITH_NITS (no must-fix). Score must exclude leakage cols: pd_default_origination, risk_based_rate, default, booked."
     },
     {
       "id": "score",
