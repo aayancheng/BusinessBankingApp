@@ -1,16 +1,15 @@
-"""Vectorized pricing over the booked population (PD from the Module 0 scorecard) +
+"""Pricing over the booked population (PD from the Module 0 scorecard) +
 portfolio summary + a validation report writer."""
 from __future__ import annotations
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from shared.config import RAW, MARKET
 from score.src.predict import predict_score_pd
 from pricing.src.engine import MarketAssumptions, price_loan
 
-DOCS = Path("pricing/docs")
+DOCS = Path(__file__).resolve().parent.parent / "docs"
 _MARKET = MarketAssumptions.from_market(MARKET)
 
 
