@@ -2,7 +2,7 @@
   "program": "business-banking-app",
   "workspace": "/Users/aayan/zzLearnAndCreate/BusinessBankingApp",
   "created_at": "2026-06-14",
-  "updated_at": "2026-06-14",
+  "updated_at": "2026-06-15",
   "spec": "docs/superpowers/specs/2026-06-14-business-banking-app-design.md",
   "ports": { "fastapi": 8100, "express": 3100, "vite": 5180 },
   "decisions": {
@@ -13,10 +13,10 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "session_status": "PAUSED 2026-06-14 — Phase 0 (Foundation) + Module 0 (Business Credit Score) complete, reviewed, and merged to main. Branch build/phase0-score merged via fce144a. Resume tomorrow (2026-06-15) with Phase Adjudication in a fresh session.",
+  "session_status": "AWAITING REVIEW 2026-06-15 — Module 1 Adjudication COMPLETE on branch build/adjudication: backend (model+policy+reason codes, AUC 0.810/lift 2.86x) + portal (FastAPI 5 routes + React 3-view UI + Dashboard, Vite-direct proxy). 46/46 backend tests + 3/3 Playwright + vite build all green. NOT merged to main — awaiting user review (mirror Phase 0/Score review->merge flow).",
   "resume_command": "Open the BusinessBankingApp workspace and say: resume the business banking build",
-  "completed_phases": ["foundation", "score"],
-  "next_action": "Phase Adjudication — LightGBM default model + policy decision layer (Approve/Refer/Decline) + reason codes + portal module. FIRST add shared LEAKAGE_COLUMNS deny-list to shared/config.py (exclude pd_default_origination, default, risk_based_rate, booked, deterioration_next_6_12mo, line_increase_good). Write the Adjudication sub-spec + plan, then build subagent-driven on a new branch build/adjudication.",
+  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal"],
+  "next_action": "Review + merge build/adjudication to main. THEN choose next: (A) Phase Pricing (Module 2, ROE/RAROC engine) — recommended next module; or (B) backfill the Score module's portal views into the shared portal (now scaffolded); or (C) cross-module Dashboard + /api/customer/{id} 360 view. Confirm with user. Carry-forward (unchanged): adjudication decision mix is conservative (Approve 30.8%/Refer 36.8%/Decline 32.4%) because hard knockouts dominate (dscr<1.0 fires on ~21% of synthetic applicants); to match the ~70% book intent regenerate the DGP with lower dscr<1.0 prevalence or make knockouts configurable. Portal scaffold is extensible: adding a module = new FastAPI router + service + Sidebar entry (currently a disabled stub) + 3 views.",
   "phases": [
     {
       "id": "foundation",
@@ -70,15 +70,37 @@
     {
       "id": "adjudication",
       "title": "Module 1 — Loan Adjudication (LightGBM + policy layer)",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
-        { "id": "subspec", "desc": "Write adjudication sub-spec + plan", "done": false },
-        { "id": "model",   "desc": "LightGBM default model + SHAP", "done": false },
-        { "id": "policy",  "desc": "Decision layer (Approve/Refer/Decline) + reason codes", "done": false },
-        { "id": "portal",  "desc": "Adjudication module views in portal", "done": false },
-        { "id": "gate",    "desc": "Metric gate + Playwright", "done": false }
+        { "id": "subspec", "desc": "Write adjudication sub-spec + plan", "done": true },
+        { "id": "model",   "desc": "LightGBM default model + SHAP", "done": true },
+        { "id": "policy",  "desc": "Decision layer (Approve/Refer/Decline) + reason codes", "done": true },
+        { "id": "portal",  "desc": "Adjudication portal: FastAPI 5 routes + React 3-view UI + Dashboard (Vite-direct)", "done": true },
+        { "id": "gate",    "desc": "Backend gate (AUC>=0.78, lift>=2.0) + 46 backend tests + 3 Playwright + vite build", "done": true }
       ],
-      "metrics": {}, "artifacts": [], "completed_at": null
+      "metrics": {
+        "auc": 0.8096, "top20_lift": 2.8554, "gate_auc_min": 0.78, "gate_lift_min": 2.0,
+        "decision_mix_test": { "approve": 0.308, "refer": 0.368, "decline": 0.324 },
+        "pd_zones": { "t_low": 0.0955, "t_high": 0.4943 },
+        "train_rows": 9600, "test_rows": 2400,
+        "backend_tests_passed": 46, "playwright_tests_passed": 3, "vite_build": "ok"
+      },
+      "artifacts": [
+        "docs/superpowers/specs/2026-06-15-adjudication-design.md",
+        "docs/superpowers/plans/2026-06-15-adjudication.md",
+        "docs/superpowers/specs/2026-06-15-adjudication-portal-design.md",
+        "docs/superpowers/plans/2026-06-15-adjudication-portal.md",
+        "shared/config.py (LEAKAGE_COLUMNS, ADJ_POLICY)",
+        "score/src/predict.py",
+        "adjudication/src/{feature_engineering,policy,reason_codes,train}.py",
+        "adjudication/models/{metadata,policy_config}.json + adjudication_model.pkl (gitignored)",
+        "adjudication/docs/validation_report.md",
+        "portal/server/{main,schemas,service}.py + tests/test_api.py",
+        "portal/client/ (Vite/React/Tailwind: lib, 10 components, 4 views, App)",
+        "portal/client/playwright.config.js + e2e/adjudication.spec.js"
+      ],
+      "completed_at": "2026-06-15",
+      "review": "Subagent-driven: backend 8 tasks + portal 7 tasks, two-stage review each. All APPROVED. Portal = Vite-direct proxy (no Express), scaffolded extensibly (other modules are disabled sidebar stubs). Carry-forward: conservative decision mix driven by hard knockouts (dscr<1.0 ~21% prevalence), not PD calibration."
     },
     {
       "id": "pricing",
