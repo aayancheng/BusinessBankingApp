@@ -956,8 +956,9 @@ def main():
         binning_process=binning_process,
         estimator=estimator,
         scaling_method="pdo_odds",
-        scaling_method_params={"pdo": 50, "odds": 20, "scorepoints": 600},
-        reverse_scorecard=True,   # higher points => lower risk (FICO-like)
+        scaling_method_params={"pdo": 50, "odds": 20, "scorecard_points": 600},
+        reverse_scorecard=False,  # optbinning 0.19 key is "scorecard_points"; reverse=False
+                                  # already yields FICO direction (high points => low risk) here
     )
     scorecard.fit(X_train, y_train)
 
