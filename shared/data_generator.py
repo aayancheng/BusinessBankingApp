@@ -90,3 +90,77 @@ def generate_businesses(n: int = N_BUSINESSES, seed: int = SEED) -> pd.DataFrame
         "pd_default_origination": pd_true.round(4), "default": default,
         "risk_based_rate": risk_based_rate, "booked": booked,
     })
+
+
+def generate_portfolio_and_panel(businesses: pd.DataFrame,
+                                 panel_months: int = PANEL_MONTHS,
+                                 seed: int = SEED):
+    """Build on-book portfolio (account-level) and a long monthly behavioral panel
+    for the BOOKED subset. Returns (portfolio_df, panel_df)."""
+    rng = np.random.default_rng(seed + 1)
+    book = businesses[businesses["booked"] == 1].reset_index(drop=True).copy()
+    m = len(book)
+
+    credit_limit = book["requested_amount"].to_numpy().astype(float)
+    tenure_months = np.minimum(book["credit_history_months"].to_numpy(),
+                               rng.integers(6, 60, m)).astype(int)
+    start_util = np.clip(book["utilization"].to_numpy() + rng.normal(0, 0.05, m), 0.02, 0.98)
+    pd_true = book["pd_default_origination"].to_numpy()
+
+    months = np.arange(panel_months)
+    drift = (pd_true - pd_true.mean()) * 0.015
+    rows = []
+    util_path = np.zeros((m, panel_months))
+    for t in months:
+        step = rng.normal(0, 0.03, m) + drift
+        cur = np.clip(start_util + step * t, 0.0, 1.2)
+        util_path[:, t] = cur
+        balance = (cur * credit_limit).round(-1)
+        dpd_lambda = np.clip(pd_true * 30 * (1 + 0.5 * (cur > 0.9)), 0, None)
+        days_past_due = rng.poisson(dpd_lambda * 0.1).astype(int)
+        deposit_inflow = np.clip(book["annual_revenue"].to_numpy() / 12.0
+                                 * rng.uniform(0.6, 1.2, m)
+                                 * (1 - 0.3 * (cur > 0.95)), 0, None).round(-1)
+        overdraft_count = rng.poisson(np.clip(cur - 0.8, 0, None) * 3).astype(int)
+        rows.append(pd.DataFrame({
+            "business_id": book["business_id"].to_numpy(),
+            "month_index": t,
+            "balance": balance,
+            "utilization": cur.round(3),
+            "days_past_due": days_past_due,
+            "deposit_inflow": deposit_inflow,
+            "overdraft_count": overdraft_count,
+        }))
+    panel = pd.concat(rows, ignore_index=True)
+
+    util_last3 = util_path[:, -3:].mean(axis=1)
+    util_trend = util_path[:, -1] - util_path[:, 0]
+    det_logit = (
+        -2.4
+        + 3.0 * pd_true
+        + 2.0 * np.clip(util_last3 - 0.85, 0, None)
+        + 1.5 * np.clip(util_trend, 0, None)
+        + 0.4 * _z(book["leverage"].to_numpy())
+        + rng.normal(0, 0.4, m)
+    )
+    deterioration = rng.binomial(1, 1.0 / (1.0 + np.exp(-det_logit))).astype(int)
+
+    li_logit = (
+        -1.0
+        - 4.0 * pd_true
+        + 2.5 * np.clip(util_last3 - 0.6, 0, None)
+        + 0.5 * _z(np.log(book["annual_revenue"].to_numpy()))
+        - 1.0 * deterioration
+        + rng.normal(0, 0.4, m)
+    )
+    line_increase_good = rng.binomial(1, 1.0 / (1.0 + np.exp(-li_logit))).astype(int)
+
+    portfolio = book.copy()
+    portfolio["credit_limit"] = credit_limit.round(-3)
+    portfolio["current_balance"] = (util_last3 * credit_limit).round(-1)
+    portfolio["utilization_onbook"] = util_last3.round(3)
+    portfolio["tenure_months"] = tenure_months
+    portfolio["deterioration_next_6_12mo"] = deterioration
+    portfolio["line_increase_good"] = line_increase_good
+
+    return portfolio, panel

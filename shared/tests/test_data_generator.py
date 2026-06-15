@@ -1,5 +1,5 @@
 import numpy as np
-from shared.data_generator import generate_businesses
+from shared.data_generator import generate_businesses, generate_portfolio_and_panel
 
 def test_generate_businesses_shape_and_columns():
     df = generate_businesses(n=2000, seed=42)
@@ -33,3 +33,29 @@ def test_determinism():
 def test_business_ids_unique():
     df = generate_businesses(n=5000, seed=42)
     assert df["business_id"].is_unique
+
+def test_portfolio_and_panel_integrity():
+    biz = generate_businesses(n=4000, seed=42)
+    portfolio, panel = generate_portfolio_and_panel(biz, panel_months=24, seed=42)
+    booked_ids = set(biz[biz["booked"] == 1]["business_id"])
+    assert set(portfolio["business_id"]).issubset(booked_ids)
+    assert len(portfolio) == len(booked_ids)
+    counts = panel.groupby("business_id")["month_index"].count()
+    assert (counts == 24).all()
+    assert set(panel["business_id"]) == set(portfolio["business_id"])
+
+def test_portfolio_targets_present_and_plausible():
+    biz = generate_businesses(n=6000, seed=42)
+    portfolio, _ = generate_portfolio_and_panel(biz, panel_months=24, seed=42)
+    for col in ["credit_limit", "current_balance", "utilization_onbook",
+                "tenure_months", "line_increase_good", "deterioration_next_6_12mo"]:
+        assert col in portfolio.columns, f"missing {col}"
+    assert 0.03 <= portfolio["deterioration_next_6_12mo"].mean() <= 0.35
+    assert 0.05 <= portfolio["line_increase_good"].mean() <= 0.60
+
+def test_panel_columns():
+    biz = generate_businesses(n=2000, seed=42)
+    _, panel = generate_portfolio_and_panel(biz, panel_months=24, seed=42)
+    for col in ["business_id", "month_index", "balance", "utilization",
+                "days_past_due", "deposit_inflow", "overdraft_count"]:
+        assert col in panel.columns, f"missing {col}"
