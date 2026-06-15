@@ -23,27 +23,15 @@ export default function SegmentsView({ hook }) {
     load();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!data || loading) {
-    return (
-      <div data-testid="view-segments" className="space-y-5">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-1">Portfolio Segments</h2>
-          <p className="text-sm text-slate-500">Decision mix by score band and industry.</p>
-        </div>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   // Convert fractions → percentages for the chart
-  const byBandData = (data.by_band || []).map((row) => ({
+  const byBandData = (data?.by_band || []).map((row) => ({
     name: row.key,
     Approve: +(row.approve * 100).toFixed(1),
     Refer:   +(row.refer   * 100).toFixed(1),
     Decline: +(row.decline * 100).toFixed(1),
   }));
 
-  const byIndustryData = (data.by_industry || []).map((row) => ({
+  const byIndustryData = (data?.by_industry || []).map((row) => ({
     name: row.key,
     Approve: +(row.approve * 100).toFixed(1),
     Refer:   +(row.refer   * 100).toFixed(1),
@@ -57,6 +45,9 @@ export default function SegmentsView({ hook }) {
         <p className="text-sm text-slate-500">Decision mix by score band and industry.</p>
       </div>
 
+      {(!data || loading) && <LoadingSpinner />}
+
+      {data && !loading && (
       <div data-testid="segments-chart" className="space-y-5">
         <Card title="Decision Mix by Score Band">
           <ResponsiveContainer width="100%" height={260}>
@@ -92,6 +83,7 @@ export default function SegmentsView({ hook }) {
           </ResponsiveContainer>
         </Card>
       </div>
+      )}
     </div>
   );
 }

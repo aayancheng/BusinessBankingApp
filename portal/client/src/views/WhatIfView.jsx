@@ -14,6 +14,9 @@ export default function WhatIfView({ hook }) {
   // Fire once on mount with defaults so a decision shows immediately
   useEffect(() => {
     run(WHATIF_DEFAULT);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleChange(key, value) {

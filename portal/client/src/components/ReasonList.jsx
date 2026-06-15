@@ -24,7 +24,7 @@ export default function ReasonList({ ruleHits = [], shapReasons = [] }) {
           <ul className="space-y-1">
             {ruleHits.map((hit, i) => (
               <li
-                key={i}
+                key={`${i}-${hit}`}
                 className="flex items-start gap-2 text-sm text-rose-700 bg-rose-50 rounded-lg px-3 py-1.5"
               >
                 <span className="mt-0.5 text-rose-400">•</span>
@@ -46,7 +46,7 @@ export default function ReasonList({ ruleHits = [], shapReasons = [] }) {
           <ul className="space-y-1">
             {shapReasons.map((r, i) => (
               <li
-                key={i}
+                key={r.feature ?? i}
                 className="flex items-center justify-between text-sm bg-amber-50 rounded-lg px-3 py-1.5"
               >
                 <span className="text-slate-700 capitalize">
