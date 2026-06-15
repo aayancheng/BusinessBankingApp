@@ -1,0 +1,107 @@
+{
+  "program": "business-banking-app",
+  "workspace": "/Users/aayan/zzLearnAndCreate/BusinessBankingApp",
+  "created_at": "2026-06-14",
+  "updated_at": "2026-06-14",
+  "spec": "docs/superpowers/specs/2026-06-14-business-banking-app-design.md",
+  "ports": { "fastapi": 8100, "express": 3100, "vite": 5180 },
+  "decisions": {
+    "architecture": "unified portal, shared backend",
+    "credit_score": "shared foundation module",
+    "data": "fully synthetic",
+    "governance": "lean (skip MRM)",
+    "venv": "self-contained",
+    "roe_hurdle": 0.15
+  },
+  "next_action": "Phase 0 — scaffold workspace + build synthetic SME data generator",
+  "phases": [
+    {
+      "id": "foundation",
+      "title": "Workspace scaffold + shared synthetic SME data",
+      "status": "pending",
+      "tasks": [
+        { "id": "venv",     "desc": "Create .venv + requirements.txt", "done": false },
+        { "id": "scaffold", "desc": "Create folder tree + CLAUDE.md + README", "done": false },
+        { "id": "datagen",  "desc": "Synthetic SME panel generator (12k businesses, 24mo panel)", "done": false },
+        { "id": "eda",      "desc": "EDA notebook + data dictionary", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    },
+    {
+      "id": "score",
+      "title": "Module 0 — Business Credit Score (WoE + Logistic scorecard)",
+      "status": "pending",
+      "tasks": [
+        { "id": "subspec",   "desc": "Write score sub-spec + plan", "done": false },
+        { "id": "features",  "desc": "feature_engineering.py + FEATURE_COLUMNS", "done": false },
+        { "id": "train",     "desc": "train.py: WoE binning, logistic scorecard, scaling, SHAP", "done": false },
+        { "id": "artifacts", "desc": "models/ artifacts + metadata.json", "done": false },
+        { "id": "gate",      "desc": "Metric gate: AUC>=0.75, KS>=0.30", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    },
+    {
+      "id": "adjudication",
+      "title": "Module 1 — Loan Adjudication (LightGBM + policy layer)",
+      "status": "pending",
+      "tasks": [
+        { "id": "subspec", "desc": "Write adjudication sub-spec + plan", "done": false },
+        { "id": "model",   "desc": "LightGBM default model + SHAP", "done": false },
+        { "id": "policy",  "desc": "Decision layer (Approve/Refer/Decline) + reason codes", "done": false },
+        { "id": "portal",  "desc": "Adjudication module views in portal", "done": false },
+        { "id": "gate",    "desc": "Metric gate + Playwright", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    },
+    {
+      "id": "pricing",
+      "title": "Module 2 — Pricing & Profitability (ROE engine)",
+      "status": "pending",
+      "tasks": [
+        { "id": "subspec", "desc": "Write pricing sub-spec + plan", "done": false },
+        { "id": "engine",  "desc": "EL pricing + ROE/RAROC waterfall engine", "done": false },
+        { "id": "hurdle",  "desc": "ROE hurdle test + mispricing detection", "done": false },
+        { "id": "portal",  "desc": "Pricing module views (waterfall, what-if, portfolio)", "done": false },
+        { "id": "gate",    "desc": "Engine validation + Playwright", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    },
+    {
+      "id": "portfolio_ews",
+      "title": "Module 3 — Portfolio Management & Early Warning",
+      "status": "pending",
+      "tasks": [
+        { "id": "subspec", "desc": "Write EWS sub-spec + plan", "done": false },
+        { "id": "panel",   "desc": "Behavioral panel features (trends)", "done": false },
+        { "id": "model",   "desc": "LightGBM deterioration model + trigger flags", "done": false },
+        { "id": "portal",  "desc": "EWS module views (trajectory, watchlist, segments)", "done": false },
+        { "id": "gate",    "desc": "Metric gate + Playwright", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    },
+    {
+      "id": "line_increase",
+      "title": "Module 4 — Proactive Line Increase (uplift + ROE gate)",
+      "status": "pending",
+      "tasks": [
+        { "id": "subspec", "desc": "Write line-increase sub-spec + plan", "done": false },
+        { "id": "model",   "desc": "Candidate model + amount rules", "done": false },
+        { "id": "roe",     "desc": "Incremental ROE gate (ties to Pricing engine)", "done": false },
+        { "id": "portal",  "desc": "Line-increase module views (candidates, simulate)", "done": false },
+        { "id": "gate",    "desc": "Metric gate + Playwright", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    },
+    {
+      "id": "portal_integration",
+      "title": "Portal integration, 360 view, exec deck, end-to-end Playwright",
+      "status": "pending",
+      "tasks": [
+        { "id": "dashboard", "desc": "Cross-module Dashboard + /api/customer/{id} 360 view", "done": false },
+        { "id": "e2e",       "desc": "End-to-end Playwright across all 5 modules", "done": false },
+        { "id": "deck",      "desc": "Executive deck + README", "done": false }
+      ],
+      "metrics": {}, "artifacts": [], "completed_at": null
+    }
+  ]
+}
