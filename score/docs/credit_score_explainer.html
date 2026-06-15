@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Credit Score — A Plain-English Explainer</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#2563eb; --accent-dark:#1e3a8a;
+    --g-D:#ef4444; --g-C:#f59e0b; --g-B:#eab308; --g-A:#84cc16; --g-AAA:#16a34a;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#fff;padding:54px 0 46px}
+  header h1{margin:0 0 8px;font-size:2.05rem;letter-spacing:-.02em}
+  header p{margin:0;max-width:640px;font-size:1.08rem;opacity:.92}
+  .badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+    color:#fff;font-size:.78rem;font-weight:600;padding:4px 11px;border-radius:999px;margin-bottom:16px;letter-spacing:.02em}
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px}
+  .stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:12px 18px;min-width:120px}
+  .stat b{display:block;font-size:1.5rem;line-height:1.2}
+  .stat span{font-size:.8rem;opacity:.9}
+  section{padding:38px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:1.4rem;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--accent);font-weight:700;margin-right:8px}
+  .lead{color:var(--muted);margin:0 0 22px;max-width:760px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:18px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .bar-label{font-size:11px;fill:var(--muted)}
+  .bar-val{font-size:11px;fill:var(--ink);font-weight:600}
+  .axis{stroke:var(--line);stroke-width:1}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:.82rem;color:var(--muted)}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .pill{display:inline-block;color:#fff;font-weight:700;font-size:.8rem;padding:2px 10px;border-radius:999px}
+  .chip{display:inline-block;background:#eef2ff;color:var(--accent-dark);font-size:.76rem;font-weight:600;
+    padding:3px 9px;border-radius:7px;margin:3px 4px 0 0}
+  .kv{display:flex;justify-content:space-between;font-size:.85rem;padding:3px 0;border-bottom:1px dashed var(--line)}
+  .kv span:first-child{color:var(--muted)}
+  .sampleScore{font-size:2.3rem;font-weight:800;line-height:1}
+  .note{background:#eff6ff;border-left:4px solid var(--accent);padding:12px 16px;border-radius:8px;color:#1e40af;font-size:.92rem;margin-top:18px}
+  .slider-wrap{margin-top:8px}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .scaleBar{height:26px;border-radius:8px;margin:10px 0 4px;
+    background:linear-gradient(90deg,var(--g-D) 0%,var(--g-D) 35%,var(--g-C) 35%,var(--g-C) 51%,
+      var(--g-B) 51%,var(--g-B) 64%,var(--g-A) 64%,var(--g-A) 73%,var(--g-AAA) 73%,var(--g-AAA) 100%)}
+  .scaleEnds{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+  .readout{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+  .readout .big{font-size:1.9rem;font-weight:800}
+  .why{display:flex;gap:12px;align-items:flex-start}
+  .why .ico{flex:0 0 38px;height:38px;border-radius:10px;background:#eef2ff;color:var(--accent-dark);
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800}
+  .why h3{margin:0 0 2px;font-size:1rem}
+  .why p{margin:0;font-size:.88rem;color:var(--muted)}
+  footer{padding:30px 0 60px;color:var(--muted);font-size:.84rem}
+  code{background:#eef2f7;padding:1px 6px;border-radius:5px;font-size:.85em}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="badge">100% SYNTHETIC DATA · NO REAL CUSTOMER INFORMATION</span>
+    <h1>What is a Business Credit Score?</h1>
+    <p>A credit score turns everything we know about a business into one simple number that
+       estimates how likely it is to repay a loan. Here's how ours works — built and tested
+       on a made-up population of small businesses.</p>
+    <div class="stats" id="heroStats"></div>
+  </div>
+</header>
+
+<section><div class="wrap">
+  <h2><span class="num">1</span>The idea in one minute</h2>
+  <p class="lead">Higher score = safer borrower. Lower score = riskier. It's the same idea as a
+     personal FICO score (300–850), but for a company. Slide the control to see how a score maps
+     to a <b>letter grade</b> and to the <b>real repayment risk</b> we observed at that level.</p>
+  <div class="card">
+    <div class="scaleBar"></div>
+    <div class="scaleEnds"><span>300 — riskiest</span><span>850 — safest</span></div>
+    <div class="slider-wrap">
+      <input type="range" id="scoreSlider" min="300" max="850" value="640" step="1">
+    </div>
+    <div class="readout">
+      <div>Score <span class="big" id="slScore">640</span></div>
+      <div>Grade <span class="pill" id="slPill">B</span></div>
+      <div>Typical repayment-failure rate at this grade:
+           <span class="big" id="slRisk">—</span></div>
+    </div>
+    <div class="note" id="slNote"></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="num">2</span>How the scores are spread out</h2>
+  <p class="lead">Each bar is a slice of the 300–850 scale; its height is how many businesses landed
+     there. Colors show the letter grade. Most businesses sit in the middle, with fewer at the
+     very safe and very risky ends — like a real credit population.</p>
+  <div class="card">
+    <svg id="histChart" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="legend" id="gradeLegend"></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="num">3</span>The whole point: a lower score really does mean more risk</h2>
+  <p class="lead">This is the test that matters. We group businesses by grade and check how many
+     actually failed to repay. If the score is any good, the bars should fall sharply from grade D
+     to grade AAA — and they do.</p>
+  <div class="card">
+    <svg id="bandChart" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="note" id="bandNote"></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="num">4</span>What pushes a score up or down</h2>
+  <p class="lead">The score weighs many facts about a business. Longer bars = more influence on the
+     score. The strongest signals are intuitive: can the business cover its loan payments, how
+     maxed-out its credit is, and how much debt it carries.</p>
+  <div class="card">
+    <svg id="featChart" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="num">5</span>See a pattern for yourself</h2>
+  <p class="lead">Two examples of how a single fact relates to risk. Businesses that comfortably cover
+     their debt payments (high DSCR) fail far less often; businesses that are nearly maxed-out on
+     credit (high utilization) fail far more often.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin:0 0 4px;font-size:1rem">Can it cover its debt payments? (DSCR)</h3>
+      <p style="margin:0 0 8px;color:var(--muted);font-size:.84rem">Left = struggles to cover payments · Right = covers them easily</p>
+      <svg id="dscrChart" viewBox="0 0 440 280" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 4px;font-size:1rem">How maxed-out is its credit? (Utilization)</h3>
+      <p style="margin:0 0 8px;color:var(--muted);font-size:.84rem">Left = barely using credit · Right = nearly maxed out</p>
+      <svg id="utilChart" viewBox="0 0 440 280" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="num">6</span>Three example businesses</h2>
+  <p class="lead">Same model, three very different companies. Notice each gets a score, an estimated
+     chance of not repaying, and plain "reason codes" — the top things holding the score back.</p>
+  <div class="grid g3" id="sampleCards"></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="num">7</span>Why a bank cares</h2>
+  <p class="lead">This one score becomes the engine behind four everyday banking decisions —
+     the rest of the app we're building on top of it.</p>
+  <div class="grid g4">
+    <div class="card why"><div class="ico">✓</div><div>
+      <h3>Approve a loan</h3><p>Use the score to decide approve, refer, or decline — with reasons.</p></div></div>
+    <div class="card why"><div class="ico">%</div><div>
+      <h3>Price the loan</h3><p>Riskier borrowers need a higher rate to make the loan profitable.</p></div></div>
+    <div class="card why"><div class="ico">⚠</div><div>
+      <h3>Spot trouble early</h3><p>Watch existing borrowers whose risk is creeping up.</p></div></div>
+    <div class="card why"><div class="ico">↑</div><div>
+      <h3>Offer more credit</h3><p>Proactively give safe, growing customers a higher limit.</p></div></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b>About this page.</b> Every number here comes from our actual trained model scoring a
+     synthetic population of <span id="ftN"></span> businesses — no real or confidential data is
+     used. Model quality: <b>AUC <span id="ftAuc"></span></b> and <b>KS <span id="ftKs"></span></b>
+     (both standard "how well does it separate safe from risky" measures; higher is better).
+     The score is a Weight-of-Evidence + logistic "scorecard," the long-standing, explainable
+     approach used across consumer and business lending.</p>
+</div></footer>
+
+<script>
+const DATA = {"n_businesses": 12000, "overall_default_rate": 0.1672, "score_range": [300, 850], "metrics": {"auc": 0.8176, "ks": 0.4946}, "histogram": [{"x0": 300, "x1": 325, "count": 205}, {"x0": 325, "x1": 350, "count": 123}, {"x0": 350, "x1": 375, "count": 178}, {"x0": 375, "x1": 400, "count": 272}, {"x0": 400, "x1": 425, "count": 409}, {"x0": 425, "x1": 450, "count": 455}, {"x0": 450, "x1": 475, "count": 612}, {"x0": 475, "x1": 500, "count": 685}, {"x0": 500, "x1": 525, "count": 868}, {"x0": 525, "x1": 550, "count": 932}, {"x0": 550, "x1": 575, "count": 981}, {"x0": 575, "x1": 600, "count": 982}, {"x0": 600, "x1": 625, "count": 964}, {"x0": 625, "x1": 650, "count": 907}, {"x0": 650, "x1": 675, "count": 772}, {"x0": 675, "x1": 700, "count": 675}, {"x0": 700, "x1": 725, "count": 567}, {"x0": 725, "x1": 750, "count": 422}, {"x0": 750, "x1": 775, "count": 347}, {"x0": 775, "x1": 800, "count": 236}, {"x0": 800, "x1": 825, "count": 162}, {"x0": 825, "x1": 850, "count": 246}], "band_table": [{"band": "D", "count": 5971, "default_rate": 0.2889, "avg_score": 486}, {"band": "C", "count": 2283, "default_rate": 0.0784, "avg_score": 610}, {"band": "B", "count": 1786, "default_rate": 0.0426, "avg_score": 668}, {"band": "A", "count": 983, "default_rate": 0.0163, "avg_score": 723}, {"band": "AAA", "count": 977, "default_rate": 0.0102, "avg_score": 796}], "feature_power": [{"name": "dscr", "iv": 0.2466}, {"name": "utilization", "iv": 0.2077}, {"name": "leverage", "iv": 0.2051}, {"name": "years_in_business", "iv": 0.1925}, {"name": "prior_delinquencies", "iv": 0.1825}, {"name": "annual_revenue", "iv": 0.1759}, {"name": "debt_to_income", "iv": 0.1363}, {"name": "revenue_per_employee", "iv": 0.121}, {"name": "credit_history_months", "iv": 0.0894}, {"name": "current_ratio", "iv": 0.0678}, {"name": "profit_margin", "iv": 0.0136}, {"name": "public_records", "iv": 0.0129}, {"name": "industry", "iv": 0.0086}, {"name": "entity_type", "iv": 0.0033}, {"name": "trade_lines", "iv": 0.002}], "decile": {"dscr": [{"decile": 1, "default_rate": 0.3071, "mid": 0.59}, {"decile": 2, "default_rate": 0.2329, "mid": 0.88}, {"decile": 3, "default_rate": 0.1975, "mid": 1.06}, {"decile": 4, "default_rate": 0.1902, "mid": 1.21}, {"decile": 5, "default_rate": 0.1623, "mid": 1.34}, {"decile": 6, "default_rate": 0.1481, "mid": 1.47}, {"decile": 7, "default_rate": 0.1305, "mid": 1.6}, {"decile": 8, "default_rate": 0.1238, "mid": 1.75}, {"decile": 9, "default_rate": 0.112, "mid": 1.93}, {"decile": 10, "default_rate": 0.0611, "mid": 2.25}], "utilization": [{"decile": 1, "default_rate": 0.0855, "mid": 0.1}, {"decile": 2, "default_rate": 0.1121, "mid": 0.18}, {"decile": 3, "default_rate": 0.1216, "mid": 0.24}, {"decile": 4, "default_rate": 0.1266, "mid": 0.3}, {"decile": 5, "default_rate": 0.1562, "mid": 0.36}, {"decile": 6, "default_rate": 0.1647, "mid": 0.41}, {"decile": 7, "default_rate": 0.1808, "mid": 0.48}, {"decile": 8, "default_rate": 0.1827, "mid": 0.55}, {"decile": 9, "default_rate": 0.2438, "mid": 0.63}, {"decile": 10, "default_rate": 0.2985, "mid": 0.75}]}, "samples": {"high_risk": {"industry": "Hospitality", "years_in_business": 6.0, "annual_revenue": 61000, "dscr": 0.79, "utilization": 0.35, "fico": 384, "pd": 0.56, "reasons": ["annual_revenue", "dscr", "prior_delinquencies"]}, "typical": {"industry": "Professional Services", "years_in_business": 14.1, "annual_revenue": 298000, "dscr": 1.26, "utilization": 0.409, "fico": 581, "pd": 0.1006, "reasons": ["leverage", "prior_delinquencies", "annual_revenue"]}, "low_risk": {"industry": "Wholesale", "years_in_business": 15.8, "annual_revenue": 2589000, "dscr": 2.36, "utilization": 0.343, "fico": 779, "pd": 0.0095, "reasons": ["prior_delinquencies", "leverage", "debt_to_income"]}}};
+
+const SVGNS = "http://www.w3.org/2000/svg";
+// Hex palette (var() and color-mix() do NOT work inside SVG presentation attributes,
+// so SVG fills use these literals; CSS classes still use the variables).
+const C = {D:"#ef4444", C:"#f59e0b", B:"#eab308", A:"#84cc16", AAA:"#16a34a",
+           accent:"#2563eb"};
+const lerp = (a,b,t)=>{ // interpolate two #rrggbb colors
+  const h=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));
+  const [r1,g1,b1]=h(a),[r2,g2,b2]=h(b);
+  const m=(x,y)=>Math.round(x+(y-x)*t).toString(16).padStart(2,"0");
+  return "#"+m(r1,r2)+m(g1,g2)+m(b1,b2);
+};
+const GRADES = [
+  {band:"D",   lo:300, hi:580, color:C.D},
+  {band:"C",   lo:580, hi:640, color:C.C},
+  {band:"B",   lo:640, hi:700, color:C.B},
+  {band:"A",   lo:700, hi:750, color:C.A},
+  {band:"AAA", lo:750, hi:851, color:C.AAA},
+];
+const FRIENDLY = {
+  dscr:"Can it cover loan payments (DSCR)", utilization:"Credit utilization (how maxed-out)",
+  leverage:"Leverage (debt vs revenue)", years_in_business:"Years in business",
+  prior_delinquencies:"Past missed payments", annual_revenue:"Annual revenue (size)",
+  debt_to_income:"Debt-to-income", revenue_per_employee:"Revenue per employee",
+  credit_history_months:"Length of credit history", current_ratio:"Current ratio (liquidity)",
+  profit_margin:"Profit margin", public_records:"Public records (liens etc.)",
+  industry:"Industry", entity_type:"Business entity type", trade_lines:"Number of trade lines"
+};
+const pct = x => (x*100).toFixed(1) + "%";
+const gradeFor = s => GRADES.find(g => s >= g.lo && s < g.hi) || GRADES[GRADES.length-1];
+const bandRow = b => DATA.band_table.find(r => r.band === b);
+function el(tag, attrs, text){
+  const n = document.createElementNS(SVGNS, tag);
+  for(const k in attrs) n.setAttribute(k, attrs[k]);
+  if(text != null) n.textContent = text;
+  return n;
+}
+
+/* hero + footer stats */
+document.getElementById("heroStats").innerHTML = `
+  <div class="stat"><b>${DATA.n_businesses.toLocaleString()}</b><span>businesses scored</span></div>
+  <div class="stat"><b>300–850</b><span>score range</span></div>
+  <div class="stat"><b>${DATA.metrics.auc}</b><span>AUC (accuracy)</span></div>
+  <div class="stat"><b>${DATA.metrics.ks}</b><span>KS (separation)</span></div>`;
+document.getElementById("ftN").textContent = DATA.n_businesses.toLocaleString();
+document.getElementById("ftAuc").textContent = DATA.metrics.auc;
+document.getElementById("ftKs").textContent = DATA.metrics.ks;
+
+/* grade legend */
+document.getElementById("gradeLegend").innerHTML = GRADES.map(g =>
+  `<span><i style="background:${g.color}"></i>${g.band} (${g.lo}–${g.hi===851?850:g.hi})</span>`).join("");
+
+/* interactive slider */
+const slS=document.getElementById("slScore"), slP=document.getElementById("slPill"),
+      slR=document.getElementById("slRisk"), slN=document.getElementById("slNote");
+function updateSlider(v){
+  const g = gradeFor(+v), row = bandRow(g.band);
+  slS.textContent = v;
+  slP.textContent = g.band; slP.style.background = g.color;
+  slR.textContent = pct(row.default_rate); slR.style.color = g.color;
+  const safer = (DATA.band_table[0].default_rate / row.default_rate);
+  slN.textContent = `Of the ${row.count.toLocaleString()} businesses in grade ${g.band}, about `
+    + `${pct(row.default_rate)} failed to repay. That's roughly ${safer.toFixed(1)}× safer than the `
+    + `lowest grade (D) — which is exactly why a bank lends more confidently as the score rises.`;
+}
+document.getElementById("scoreSlider").addEventListener("input", e => updateSlider(e.target.value));
+updateSlider(640);
+
+/* histogram */
+(function(){
+  const W=900,H=320,P={l:46,r:14,t:14,b:54}, iw=W-P.l-P.r, ih=H-P.t-P.b;
+  const svg=document.getElementById("histChart");
+  const max=Math.max(...DATA.histogram.map(d=>d.count));
+  const bw=iw/DATA.histogram.length;
+  svg.appendChild(el("line",{x1:P.l,y1:P.t+ih,x2:P.l+iw,y2:P.t+ih,class:"axis"}));
+  [0,.25,.5,.75,1].forEach(t=>{
+    const y=P.t+ih-t*ih;
+    svg.appendChild(el("line",{x1:P.l,y1:y,x2:P.l+iw,y2:y,class:"axis","stroke-dasharray":"2 3"}));
+    svg.appendChild(el("text",{x:P.l-8,y:y+4,"text-anchor":"end",class:"bar-label"},Math.round(max*t)));
+  });
+  DATA.histogram.forEach((d,i)=>{
+    const h=d.count/max*ih, x=P.l+i*bw, y=P.t+ih-h;
+    const g=gradeFor((d.x0+d.x1)/2);
+    svg.appendChild(el("rect",{x:x+1,y:y,width:bw-2,height:h,rx:2,fill:g.color,opacity:.88}));
+    if(i%2===0) svg.appendChild(el("text",{x:x+bw/2,y:P.t+ih+16,"text-anchor":"middle",class:"bar-label"},d.x0));
+  });
+  svg.appendChild(el("text",{x:P.l+iw/2,y:H-8,"text-anchor":"middle",class:"bar-label"},"Credit score (300 – 850)"));
+})();
+
+/* default rate by grade */
+(function(){
+  const W=900,H=320,P={l:56,r:14,t:14,b:50}, iw=W-P.l-P.r, ih=H-P.t-P.b;
+  const svg=document.getElementById("bandChart");
+  const rows=DATA.band_table, max=Math.max(...rows.map(d=>d.default_rate));
+  const bw=iw/rows.length;
+  svg.appendChild(el("line",{x1:P.l,y1:P.t+ih,x2:P.l+iw,y2:P.t+ih,class:"axis"}));
+  [0,.25,.5,.75,1].forEach(t=>{
+    const y=P.t+ih-t*ih;
+    svg.appendChild(el("line",{x1:P.l,y1:y,x2:P.l+iw,y2:y,class:"axis","stroke-dasharray":"2 3"}));
+    svg.appendChild(el("text",{x:P.l-8,y:y+4,"text-anchor":"end",class:"bar-label"},pct(max*t)));
+  });
+  rows.forEach((d,i)=>{
+    const h=d.default_rate/max*ih, x=P.l+i*bw, y=P.t+ih-h;
+    const g=GRADES.find(g=>g.band===d.band);
+    svg.appendChild(el("rect",{x:x+bw*0.18,y:y,width:bw*0.64,height:h,rx:4,fill:g.color}));
+    svg.appendChild(el("text",{x:x+bw/2,y:y-7,"text-anchor":"middle",class:"bar-val"},pct(d.default_rate)));
+    svg.appendChild(el("text",{x:x+bw/2,y:P.t+ih+20,"text-anchor":"middle",class:"bar-label"},
+      "Grade "+d.band));
+    svg.appendChild(el("text",{x:x+bw/2,y:P.t+ih+34,"text-anchor":"middle",class:"bar-label"},
+      d.count.toLocaleString()+" biz"));
+  });
+  const best=rows[rows.length-1], worst=rows[0];
+  document.getElementById("bandNote").textContent =
+    `Read it plainly: about ${pct(worst.default_rate)} of grade-D businesses failed to repay, versus `
+    + `only ${pct(best.default_rate)} of grade-AAA. The score sorts good from bad before a penny is lent.`;
+})();
+
+/* feature power (horizontal) */
+(function(){
+  const rows=DATA.feature_power, W=900, rowH=26, P={l:250,r:60,t:10,b:10};
+  const H=P.t+P.b+rows.length*rowH;
+  const svg=document.getElementById("featChart"); svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const iw=W-P.l-P.r, max=Math.max(...rows.map(d=>d.iv));
+  rows.forEach((d,i)=>{
+    const y=P.t+i*rowH, w=Math.max(2,d.iv/max*iw);
+    svg.appendChild(el("text",{x:P.l-10,y:y+rowH/2+4,"text-anchor":"end",class:"bar-label"},
+      FRIENDLY[d.name]||d.name));
+    svg.appendChild(el("rect",{x:P.l,y:y+4,width:w,height:rowH-10,rx:4,
+      fill:C.accent,opacity:(0.5+0.5*d.iv/max).toFixed(2)}));
+    svg.appendChild(el("text",{x:P.l+w+8,y:y+rowH/2+4,class:"bar-val"},d.iv.toFixed(2)));
+  });
+})();
+
+/* decile charts */
+function decileChart(id, rows, lowColor, highColor){
+  const W=440,H=280,P={l:44,r:10,t:12,b:46}, iw=W-P.l-P.r, ih=H-P.t-P.b;
+  const svg=document.getElementById(id);
+  const max=Math.max(...rows.map(d=>d.default_rate)), bw=iw/rows.length;
+  svg.appendChild(el("line",{x1:P.l,y1:P.t+ih,x2:P.l+iw,y2:P.t+ih,class:"axis"}));
+  [0,.5,1].forEach(t=>{
+    const y=P.t+ih-t*ih;
+    svg.appendChild(el("line",{x1:P.l,y1:y,x2:P.l+iw,y2:y,class:"axis","stroke-dasharray":"2 3"}));
+    svg.appendChild(el("text",{x:P.l-7,y:y+4,"text-anchor":"end",class:"bar-label"},pct(max*t)));
+  });
+  rows.forEach((d,i)=>{
+    const h=d.default_rate/max*ih, x=P.l+i*bw, y=P.t+ih-h;
+    const mix=i/(rows.length-1);
+    svg.appendChild(el("rect",{x:x+bw*0.15,y:y,width:bw*0.7,height:h,rx:3,
+      fill:lerp(lowColor,highColor,mix)}));
+  });
+  svg.appendChild(el("text",{x:P.l+iw/2,y:H-22,"text-anchor":"middle",class:"bar-label"},"low → high (10 equal groups)"));
+  svg.appendChild(el("text",{x:P.l+iw/2,y:H-7,"text-anchor":"middle",class:"bar-label"},"bar height = % that failed to repay"));
+}
+decileChart("dscrChart", DATA.decile.dscr, C.D, C.AAA);   // safer to the right
+decileChart("utilChart", DATA.decile.utilization, C.AAA, C.D); // riskier to the right
+
+/* sample cards */
+(function(){
+  const order=[["low_risk","Low risk"],["typical","Typical"],["high_risk","High risk"]];
+  const host=document.getElementById("sampleCards");
+  order.forEach(([k,label])=>{
+    const s=DATA.samples[k], g=gradeFor(s.fico);
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">${label}</div>
+          <div class="sampleScore" style="color:${g.color}">${s.fico}</div></div>
+        <span class="pill" style="background:${g.color}">Grade ${g.band}</span>
+      </div>
+      <div style="margin:10px 0">
+        <div class="kv"><span>Industry</span><span>${s.industry}</span></div>
+        <div class="kv"><span>Years in business</span><span>${s.years_in_business}</span></div>
+        <div class="kv"><span>Annual revenue</span><span>$${s.annual_revenue.toLocaleString()}</span></div>
+        <div class="kv"><span>Covers debt payments (DSCR)</span><span>${s.dscr}</span></div>
+        <div class="kv"><span>Credit utilization</span><span>${pct(s.utilization)}</span></div>
+        <div class="kv"><span>Chance of not repaying</span><span style="color:${g.color};font-weight:700">${pct(s.pd)}</span></div>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);font-weight:600">Top reasons holding the score back</div>
+      <div>${s.reasons.map(r=>`<span class="chip">${FRIENDLY[r]||r}</span>`).join("")}</div>`;
+    host.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>
