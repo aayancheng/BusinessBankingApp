@@ -20,3 +20,12 @@ export async function decide(payload) {
 export async function fetchSegments() {
   return (await api.get('/api/adjudication/segments')).data;
 }
+export async function fetchPricing(id) {
+  return (await api.get(`/api/pricing/${id}`)).data;
+}
+export async function fetchPricingPortfolio() {
+  return (await api.get('/api/pricing/portfolio')).data;
+}
+export async function pricingQuote(payload) {
+  return (await api.post('/api/pricing/quote', payload)).data;
+}
