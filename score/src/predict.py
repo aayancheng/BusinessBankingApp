@@ -12,7 +12,6 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from shared.config import SCORE_MIN, SCORE_MAX
 from score.src.feature_engineering import FEATURE_COLUMNS, compute_features
 from score.src.train import score_to_fico
 
@@ -32,8 +31,11 @@ def predict_score_pd(df: pd.DataFrame) -> pd.DataFrame:
     """Return DataFrame[business_score, pd, score_band] aligned to df.index."""
     scorecard, lo, hi = _load()
     X = compute_features(df)[FEATURE_COLUMNS]
-    pd_hat = scorecard.predict_proba(X)[:, 1]
-    fico = score_to_fico(scorecard.score(X), lo, hi)
+    # The optbinning WoE matmul can emit cosmetic over/divide/invalid warnings on
+    # extreme feature values; correctness is unaffected, so guard the scoring calls.
+    with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
+        pd_hat = scorecard.predict_proba(X)[:, 1]
+        fico = score_to_fico(scorecard.score(X), lo, hi)
     band = pd.cut(fico, bins=_BANDS_BINS, labels=_BANDS_LABELS, include_lowest=True)
     return pd.DataFrame(
         {
