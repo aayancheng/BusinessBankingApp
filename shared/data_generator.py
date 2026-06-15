@@ -164,3 +164,21 @@ def generate_portfolio_and_panel(businesses: pd.DataFrame,
     portfolio["line_increase_good"] = line_increase_good
 
     return portfolio, panel
+
+
+def main():
+    biz = generate_businesses()
+    portfolio, panel = generate_portfolio_and_panel(biz)
+    biz.to_parquet(RAW / "businesses.parquet", index=False)
+    portfolio.to_parquet(RAW / "portfolio.parquet", index=False)
+    panel.to_parquet(RAW / "panel.parquet", index=False)
+    print(f"businesses: {len(biz):,} rows, default rate {biz['default'].mean():.3f}, "
+          f"booked {biz['booked'].mean():.3f}")
+    print(f"portfolio:  {len(portfolio):,} accounts, "
+          f"deterioration {portfolio['deterioration_next_6_12mo'].mean():.3f}, "
+          f"line_increase_good {portfolio['line_increase_good'].mean():.3f}")
+    print(f"panel:      {len(panel):,} rows ({panel['month_index'].nunique()} months)")
+
+
+if __name__ == "__main__":
+    main()
