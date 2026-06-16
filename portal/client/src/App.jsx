@@ -10,10 +10,14 @@ import PricingPortfolioView from './views/pricing/PricingPortfolioView';
 import EwsLookupView from './views/ews/EwsLookupView';
 import EwsWatchlistView from './views/ews/EwsWatchlistView';
 import EwsSegmentsView from './views/ews/EwsSegmentsView';
+import LineIncreaseLookupView from './views/line_increase/LineIncreaseLookupView';
+import LineIncreaseCandidatesView from './views/line_increase/LineIncreaseCandidatesView';
+import LineIncreaseSegmentsView from './views/line_increase/LineIncreaseSegmentsView';
 import {
   useApplication, useDecide, useSegments, useHealth,
   usePricing, usePricingPortfolio, usePricingQuote,
   useEws, useEwsWatchlist, useEwsSegments,
+  useLineIncrease, useCandidates, useLineIncreaseSegments,
 } from './lib/hooks';
 
 export default function App() {
@@ -28,6 +32,9 @@ export default function App() {
   const ews = useEws();
   const ewsWatch = useEwsWatchlist();
   const ewsSeg = useEwsSegments();
+  const lineIncrease = useLineIncrease();
+  const candidatesHook = useCandidates();
+  const liSeg = useLineIncreaseSegments();
 
   const onNavigate = (module, view) => setNav({ module, view });
   const is = (m, v) => nav.module === m && nav.view === v;
@@ -46,6 +53,9 @@ export default function App() {
         {is('ews', 'lookup') && <EwsLookupView hook={ews} />}
         {is('ews', 'watchlist') && <EwsWatchlistView hook={ewsWatch} />}
         {is('ews', 'segments') && <EwsSegmentsView hook={ewsSeg} />}
+        {is('line_increase', 'lookup') && <LineIncreaseLookupView hook={lineIncrease} />}
+        {is('line_increase', 'candidates') && <LineIncreaseCandidatesView hook={candidatesHook} />}
+        {is('line_increase', 'segments') && <LineIncreaseSegmentsView hook={liSeg} />}
       </main>
     </div>
   );

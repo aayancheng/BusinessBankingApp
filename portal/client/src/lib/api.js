@@ -38,3 +38,15 @@ export async function fetchEwsWatchlist(limit = 100) {
 export async function fetchEwsSegments() {
   return (await api.get('/api/ews/segments')).data;
 }
+export async function fetchLineIncrease(id) {
+  return (await api.get(`/api/line-increase/${id}`)).data;
+}
+export async function fetchCandidates(page = 1, perPage = 100) {
+  return (await api.get('/api/line-increase/candidates', { params: { page, per_page: perPage } })).data;
+}
+export async function lineIncreaseSimulate(payload) {
+  return (await api.post('/api/line-increase/simulate', payload)).data;
+}
+export async function fetchLineIncreaseSegments() {
+  return (await api.get('/api/line-increase/segments')).data;
+}
