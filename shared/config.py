@@ -85,5 +85,8 @@ LINE_INCREASE = {
     "revenue_mult_cap": 0.30,
     "round_to": 1000,
     "offer_quantile": 0.75,
+    "max_pd_quantile": 0.50,  # risk appetite: only offer to accounts at/below this modeled-PD
+                              # quantile of the book (the lower-risk half). Calibrated at train
+                              # time to offer_max_pd in metadata.json.
     "roe_hurdle": 0.15,
 }

@@ -671,6 +671,7 @@ def _load():
 def score_population() -> pd.DataFrame:
     model, meta = _load()
     threshold = meta["offer_threshold"]
+    max_pd = meta["offer_max_pd"]  # risk-appetite ceiling (book-median modeled PD)
     port = pd.read_parquet(RAW / "portfolio.parquet")
     feats = compute_line_increase_features(port)
     X = feats[LI_FEATURE_COLUMNS]
@@ -690,7 +691,8 @@ def score_population() -> pd.DataFrame:
                                  float(port["annual_revenue"].iloc[i]))
         r = incremental_roe(pd_i, amt, float(port["utilization_onbook"].iloc[i]),
                             rate_i, _MARKET)
-        eligible = bool(prob[i] >= threshold and amt > 0 and r["clears_hurdle"])
+        eligible = bool(prob[i] >= threshold and pd_i <= max_pd
+                        and amt > 0 and r["clears_hurdle"])
         recs.append({
             "business_id": str(port["business_id"].iloc[i]),
             "industry": str(port["industry"].iloc[i]),

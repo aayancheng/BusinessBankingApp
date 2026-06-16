@@ -26,23 +26,40 @@ exposure ROE-accretive?* — and present a ranked, gated offer list.
 - **Aggregate incremental exposure is ROE-positive** (the offered book's
   exposure-weighted incremental ROE ≥ the hurdle).
 
-These are reachable: unlike the EWS deterioration target (noise-capped at ~0.70 oracle
-AUC), the `line_increase_good` DGP logit has only 0.4σ noise against coefficients up to
-4.0 — a strong, learnable signal.
+> **Build note (2026-06-16) — DGP sharpened (Option A).** The *original* `line_increase_good`
+> target was Bernoulli-noise-capped just like the EWS deterioration target: the noise-free DGP
+> logit reached only AUC 0.71 and an oracle LightGBM (with leakage drivers) only 0.66, so
+> AUC ≥ 0.78 was unreachable. Because `line_increase_good` is a **pure leaf** (no module
+> consumes it as a feature) and is the **last stochastic draw** in `generate_portfolio_and_panel`,
+> its logit coefficients + noise were re-tuned to lean on the *observable* drivers (on-book
+> utilization, revenue) with reduced Bernoulli noise — lifting the achievable AUC to ~0.84 —
+> **without changing the RNG call structure**, so `businesses.parquet`, `panel.parquet`, and
+> every other `portfolio.parquet` column are bit-identical (verified by per-column hash; the
+> 80 Modules 0–3 tests stay green). New base rate ≈ 0.222 (was 0.229).
+>
+> **Build note (2026-06-16) — risk-appetite PD ceiling added.** Because the sharpened target
+> leans on utilization (which drifts upward with PD in the panel), a purely utilization-gated
+> offer set skewed marginally *higher* PD than the book. To honor the "recommended cohort is
+> lower-risk / within risk appetite" criterion, offer-eligibility gained a **modeled-PD ceiling**
+> (`LINE_INCREASE['max_pd_quantile']` = 0.50, calibrated at train time to `offer_max_pd` in
+> metadata): proactive increases go only to accounts at/below the book-median modeled PD that
+> are also high-utilization and ROE-accretive. Result at gate: cohort PD 0.036 ≪ book 0.117,
+> cohort util 0.837 > 0.471, agg incremental ROE 0.215, AUC 0.813, top-20% lift 2.66×.
 
 ---
 
 ## 2. The target and its DGP (for leakage discipline)
 
-`line_increase_good` (in `shared/data_generator.py`) is a Bernoulli draw on:
+`line_increase_good` (in `shared/data_generator.py`) is a Bernoulli draw on the **sharpened**
+logit (see Build note above):
 
 ```
-li_logit = -1.0
-           - 4.0 * pd_true                      # lower risk  -> better candidate
-           + 2.5 * clip(util_last3 - 0.6, 0)    # high utilization -> needs headroom
-           + 0.5 * z(log annual_revenue)        # capacity
-           - 1.0 * deterioration                # not deteriorating
-           + N(0, 0.4)
+li_logit = -2.1
+           - 3.0 * pd_true                      # lower risk  -> better candidate
+           + 7.0 * clip(util_last3 - 0.5, 0)    # high utilization -> needs headroom (observable)
+           + 1.2 * z(log annual_revenue)        # capacity (observable)
+           - 0.4 * deterioration                # not deteriorating
+           + N(0, 0.18)
 ```
 
 Three of the four drivers are **leakage columns** the model must NOT consume as features:
