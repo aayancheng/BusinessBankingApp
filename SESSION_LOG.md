@@ -370,3 +370,89 @@ reduce DGP noise + regenerate, verified safe for already-merged modules) is docu
 `build/ews`.
 
 **Resume:** open `BusinessBankingApp` and say "resume the business banking build".
+
+---
+
+## Session 6 — 2026-06-16 — Module 4 Proactive Line Increase (candidate model + incremental ROE gate)
+
+**Scope (user-confirmed):** backend + portal in one session. Subagent-driven, 10 tasks
+(T1–T10), one implementer + one (or combined) reviewer per task; trivial config/test tasks
+controller-verified. Branch `build/line-increase`. Modules 0–3 already merged to main.
+
+**Built:**
+- **`line_increase/src/amount_rules.py`** — pure: `recommended_amount` (headroom-to-target
+  utilization, capped by % of limit + revenue ceiling, rounded) + `incremental_roe`
+  (prices the incremental exposure via `pricing/src/engine.py`; EAD = Δlimit × on-book
+  utilization). Documents that ROE is EAD-invariant (drawdown scales $, not the ratio).
+- **`feature_engineering.py`** — leakage-safe candidate features from `portfolio.parquet` +
+  modeled PD from `score/src/predict`. **`train.py`** — LightGBM on `line_increase_good` +
+  positive-SHAP reasons (reuses `top_adverse_shap`) + the real gate. **`candidates.py`** —
+  scored population + ranked eligible candidates + segments.
+- **Portal** — `line_increase_service.py` + 4 routes (`/candidates`, `/segments`,
+  `/simulate`, `/{id}`); lifespan caches the scored pop. Three views (Lookup with a what-if
+  amount slider, Candidates table, Segments chart); **four-module nav** (the disabled "Line
+  Increase" stub promoted). API tests. `line_increase.spec.js` (3).
+
+**The headline event — T4 BLOCK + Option A (user decision):** the trainer correctly
+escalated a genuine BLOCK: the synthetic `line_increase_good` target was Bernoulli-noise-
+capped (independently verified: noise-free DGP logit AUC 0.71, oracle LightGBM 0.66), so the
+spec's AUC≥0.78 / lift≥2.0 were unreachable — the same failure mode as Module 3's EWS target.
+Unlike EWS, `line_increase_good` is a **pure leaf** (no module consumes it as a feature) and
+is the **last stochastic draw** in `generate_portfolio_and_panel`, so the user chose **Option
+A — a targeted, safe DGP sharpen**: re-tuned only that column's logit to lean on the
+*observable* drivers (on-book utilization, revenue) with reduced Bernoulli noise, keeping the
+RNG call structure identical. Per-column hashing proved `businesses.parquet`,
+`panel.parquet`, and every other `portfolio.parquet` column **bit-identical**; the 80 Modules
+0–3 tests stayed green. A **risk-appetite modeled-PD ceiling** (`max_pd_quantile`=0.50) was
+then added to offer-eligibility so the offered cohort is genuinely lower-risk (the sharpened
+util-weighting alone skewed the cohort marginally higher-PD via the panel's util↔PD drift).
+
+**Gate (now real, not weakened):** AUC **0.8128**, top-20% lift **2.66x**, offered **95**
+accounts, cohort PD **0.036** ≪ book 0.117, cohort util **0.837** > book 0.471, aggregate
+exposure-weighted incremental ROE **0.215** ≥ 0.15 hurdle. New base rate 0.222 (was 0.229).
+
+**Gates:** **97/97 backend pytest**, **12/12 Playwright** (3 adj + 3 pricing + 3 ews + 3
+line-increase), **vite build ok**. (Also added a missing `line_increase/tests` to
+`pytest.ini` testpaths.)
+
+**Subagent token tally (Module 4) — for evaluating the subagent design:**
+
+| Task | Role | Model | Tokens | Outcome |
+|------|------|-------|-------:|---------|
+| T1 config | — | controller | — | trivial append, controller-done |
+| T2 amount rules | impl | sonnet | 27,882 | DONE → APPROVED |
+| T2 amount rules | spec review | haiku | 29,767 | ✅ compliant |
+| T2 amount rules | quality review | sonnet | 33,351 | APPROVED (EAD-invariance test verified) |
+| T3 features | impl | sonnet | 22,941 | DONE → APPROVED |
+| T3 features | review (combined) | haiku | 28,841 | ✅ compliant + well-built |
+| T4 trainer | impl | sonnet | 36,285 | **BLOCKED** (gate unreachable) → controller resolved Option A |
+| T4 trainer | review (combined) | sonnet | 39,663 | APPROVED (back-compat RNG-safety verified, 93 green) |
+| T5 candidates | impl | sonnet | 28,616 | DONE → APPROVED (eligible=95 matches trainer) |
+| T5 candidates | review (combined) | haiku | 26,646 | ✅ compliant + well-built |
+| T6 portal backend | impl | sonnet | 33,786 | DONE → APPROVED |
+| T6 portal backend | review (combined) | sonnet | 31,875 | APPROVED (field names exact, back-compat) |
+| T7 API tests | impl | haiku | 26,077 | DONE; controller-verified (97 passed) |
+| T8 frontend wiring | impl | sonnet | 35,716 | DONE |
+| T9 views | impl | sonnet | 28,249 | DONE (vite build passes) |
+| T8+T9 frontend | review (combined) | sonnet | 33,236 | APPROVED (testids match, back-compat) |
+| T10 playwright | — | controller | — | spec written + 12/12 e2e + ledger/tally |
+
+- **Module 4 total: ~462,931 tokens / 15 dispatches** (impl 213,475 + review 249,456).
+- By model: sonnet 351,600 (11), haiku 111,331 (4).
+- **1 genuine BLOCK** (T4) — the second program escalation of a noise-capped synthetic target.
+  This time the controller (with the user) chose to *fix the data* rather than weaken the gate,
+  which was only safe because the target is a pure leaf — a distinction the spec/plan called out
+  in advance. The back-compat review (re-verifying the RNG argument + 93 green) was the highest-
+  value review of the module, mirroring the nav-refactor lesson from Modules 1–3.
+- **Program cumulative: ~2,791,170 tokens** across 6 build sessions, ~70 subagent dispatches.
+- **Design takeaways:** (a) escalating a mathematically-unreachable gate remains the single
+  most valuable subagent behavior; (b) "is this column a pure leaf?" is the question that
+  decided fix-the-data vs. honest-gate — worth front-loading that analysis in any synthetic-data
+  module; (c) combining spec+quality review into one dispatch for exact-transcription tasks
+  (T3, T5, T6, T8+T9) roughly halved review cost with no loss of coverage given the full gates.
+
+**Status:** Module 4 complete — the 4th and final app. **Awaiting user review before
+`--no-ff` merge to `main`.** Branch `build/line-increase`. After merge, one phase remains:
+portal_integration (cross-module Dashboard + 360 view + exec deck).
+
+**Resume:** open `BusinessBankingApp` and say "resume the business banking build".

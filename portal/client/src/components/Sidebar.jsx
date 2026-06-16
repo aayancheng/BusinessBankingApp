@@ -18,9 +18,14 @@ const EWS_ITEMS = [
   { module: 'ews', view: 'segments',  testid: 'nav-ews-segments',  label: 'Segments',  icon: PieChart },
 ];
 
+const LINE_INCREASE_ITEMS = [
+  { module: 'line_increase', view: 'lookup',     testid: 'nav-li-lookup',     label: 'Lookup',     icon: Search },
+  { module: 'line_increase', view: 'candidates', testid: 'nav-li-candidates', label: 'Candidates', icon: TrendingUp },
+  { module: 'line_increase', view: 'segments',   testid: 'nav-li-segments',   label: 'Segments',   icon: PieChart },
+];
+
 const DISABLED_ITEMS = [
-  { label: 'Score',         icon: Star },
-  { label: 'Line Increase', icon: TrendingUp },
+  { label: 'Score', icon: Star },
 ];
 
 export default function Sidebar({ module, view, onNavigate }) {
@@ -83,6 +88,9 @@ export default function Sidebar({ module, view, onNavigate }) {
         <GroupHeader>Early Warning</GroupHeader>
         {EWS_ITEMS.map(NavButton)}
 
+        <GroupHeader>Line Increase</GroupHeader>
+        {LINE_INCREASE_ITEMS.map(NavButton)}
+
         <GroupHeader>Coming soon</GroupHeader>
         {DISABLED_ITEMS.map(({ label, icon: Icon }) => (
           <div
@@ -96,7 +104,7 @@ export default function Sidebar({ module, view, onNavigate }) {
       </nav>
 
       <div className="px-5 py-4 text-[11px] text-slate-500 border-t border-slate-700">
-        Adjudication + Pricing + Early Warning
+        Adjudication + Pricing + Early Warning + Line Increase
       </div>
     </aside>
   );

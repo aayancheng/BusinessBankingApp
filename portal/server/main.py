@@ -14,11 +14,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from portal.server import service
 from portal.server import pricing_service
 from portal.server import ews_service
+from portal.server import line_increase_service
 from portal.server.schemas import (
     AdjudicationDetail, DecideRequest, HealthResponse,
     PaginatedApplications, SegmentsResponse,
     PricingDetail, QuoteRequest, QuoteResponse, PricingPortfolio,
     EwsDetail, WatchlistItem, EwsSegments,
+    LineIncreaseDetail, PaginatedCandidates, SimulateRequest, SimulateResponse,
+    LineIncreaseSegments,
 )
 
 
@@ -33,6 +36,7 @@ async def lifespan(app: FastAPI):
     app.state.pop = service.score_population(model, config, explainer)
     app.state.pricing_pop = pricing_service.load_population()
     app.state.ews_pop = ews_service.load_population()
+    app.state.li_pop = line_increase_service.load_population()
     yield
 
 
@@ -114,6 +118,38 @@ def ews_segments():
 @app.get("/api/ews/{business_id}", response_model=EwsDetail)
 def ews_detail(business_id: str):
     rec = ews_service.detail_record(business_id, app.state.ews_pop)
+    if rec is None:
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
+    return rec
+
+
+@app.get("/api/line-increase/candidates", response_model=PaginatedCandidates)
+def line_increase_candidates(page: int = Query(1, ge=1),
+                             per_page: int = Query(50, ge=1, le=500)):
+    items_all = line_increase_service.candidates(app.state.li_pop)
+    total = len(items_all)
+    pages = max(1, (total + per_page - 1) // per_page)
+    start = (page - 1) * per_page
+    return {"items": items_all[start:start + per_page],
+            "page": page, "pages": pages, "total": total}
+
+
+@app.get("/api/line-increase/segments", response_model=LineIncreaseSegments)
+def line_increase_segments():
+    return line_increase_service.segments(app.state.li_pop)
+
+
+@app.post("/api/line-increase/simulate", response_model=SimulateResponse)
+def line_increase_simulate(req: SimulateRequest):
+    rec = line_increase_service.simulate(req.model_dump(), app.state.li_pop)
+    if rec is None:
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": req.business_id})
+    return rec
+
+
+@app.get("/api/line-increase/{business_id}", response_model=LineIncreaseDetail)
+def line_increase_detail(business_id: str):
+    rec = line_increase_service.detail_record(business_id, app.state.li_pop)
     if rec is None:
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
     return rec

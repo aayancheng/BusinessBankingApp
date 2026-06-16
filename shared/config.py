@@ -70,3 +70,23 @@ EWS_TRIGGERS = {
 # Early-Warning risk-tier cutoffs on predicted deterioration probability.
 # Seed values; re-calibrated from the score distribution at train time.
 EWS_TIERS = {"t_high": 0.40, "t_med": 0.20}
+
+# Proactive Line Increase (Module 4) — amount rules + incremental-ROE gate.
+# target_util: post-increase utilization target the amount rule aims for.
+# pct_cap: max increase as a fraction of the current limit.
+# revenue_mult_cap: total post-increase limit capped at this multiple of annual revenue.
+# round_to: recommended increase rounded to the nearest this many currency units.
+# offer_quantile: candidates with predicted prob at/above this population quantile are
+#   offer-eligible (re-calibrated at train time and written to metadata.json).
+# roe_hurdle: incremental-ROE hurdle (mirrors MARKET['roe_hurdle']).
+LINE_INCREASE = {
+    "target_util": 0.65,
+    "pct_cap": 0.50,
+    "revenue_mult_cap": 0.30,
+    "round_to": 1000,
+    "offer_quantile": 0.75,
+    "max_pd_quantile": 0.50,  # risk appetite: only offer to accounts at/below this modeled-PD
+                              # quantile of the book (the lower-risk half). Calibrated at train
+                              # time to offer_max_pd in metadata.json.
+    "roe_hurdle": 0.15,
+}

@@ -145,13 +145,21 @@ def generate_portfolio_and_panel(businesses: pd.DataFrame,
     )
     deterioration = rng.binomial(1, 1.0 / (1.0 + np.exp(-det_logit))).astype(int)
 
+    # Sharpened (2026-06-16, Module 4): lean the signal on the OBSERVABLE drivers (on-book
+    # utilization, revenue capacity) and reduce the Bernoulli noise so a leakage-safe model
+    # can actually learn good line-increase candidates. The prior target was noise-capped
+    # (oracle AUC ~0.66, ceiling ~0.71); this lifts the achievable AUC to ~0.84. Safe because
+    # line_increase_good is a pure leaf (no module consumes it as a feature) AND this is the
+    # last stochastic draw in the function — the rng call structure is unchanged, so
+    # businesses.parquet, panel.parquet, and every other portfolio column stay bit-identical.
+    # See docs/superpowers/specs/2026-06-16-line-increase-design.md (§2).
     li_logit = (
-        -1.0
-        - 4.0 * pd_true
-        + 2.5 * np.clip(util_last3 - 0.6, 0, None)
-        + 0.5 * _z(np.log(book["annual_revenue"].to_numpy()))
-        - 1.0 * deterioration
-        + rng.normal(0, 0.4, m)
+        -2.1
+        - 3.0 * pd_true
+        + 7.0 * np.clip(util_last3 - 0.5, 0, None)
+        + 1.2 * _z(np.log(book["annual_revenue"].to_numpy()))
+        - 0.4 * deterioration
+        + rng.normal(0, 0.18, m)
     )
     line_increase_good = rng.binomial(1, 1.0 / (1.0 + np.exp(-li_logit))).astype(int)
 

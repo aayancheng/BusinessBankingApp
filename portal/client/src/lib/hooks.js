@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments } from './api';
+import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments, fetchLineIncrease, fetchCandidates, lineIncreaseSimulate, fetchLineIncreaseSegments } from './api';
 
 function asError(e) {
   return e.response?.data?.detail || { error: 'unknown', message: 'Request failed' };
@@ -122,6 +122,44 @@ export function useEwsSegments() {
   const load = useCallback(async () => {
     setLoading(true);
     try { setData(await fetchEwsSegments()); } finally { setLoading(false); }
+  }, []);
+  return { data, loading, load };
+}
+
+export function useLineIncrease() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [sim, setSim] = useState(null);
+  const lookup = useCallback(async (id) => {
+    if (!id) return;
+    setLoading(true); setError(null); setSim(null);
+    try { setData(await fetchLineIncrease(id)); }
+    catch (e) { setData(null); setError(e.response?.data?.detail || { message: 'Request failed' }); }
+    finally { setLoading(false); }
+  }, []);
+  const runSimulate = useCallback(async (payload) => {
+    try { setSim(await lineIncreaseSimulate(payload)); } catch { /* noop */ }
+  }, []);
+  return { data, error, loading, lookup, sim, runSimulate };
+}
+
+export function useCandidates() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setData((await fetchCandidates(1, 100)).items || []); } finally { setLoading(false); }
+  }, []);
+  return { data, loading, load };
+}
+
+export function useLineIncreaseSegments() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setData(await fetchLineIncreaseSegments()); } finally { setLoading(false); }
   }, []);
   return { data, loading, load };
 }

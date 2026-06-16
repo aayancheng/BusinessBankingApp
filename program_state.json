@@ -2,7 +2,7 @@
   "program": "business-banking-app",
   "workspace": "/Users/aayan/zzLearnAndCreate/BusinessBankingApp",
   "created_at": "2026-06-14",
-  "updated_at": "2026-06-15",
+  "updated_at": "2026-06-16",
   "spec": "docs/superpowers/specs/2026-06-14-business-banking-app-design.md",
   "ports": { "fastapi": 8100, "express": 3100, "vite": 5180 },
   "decisions": {
@@ -13,11 +13,11 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "session_status": "PAUSED 2026-06-15 — Modules 0,1,2,3 ALL COMPLETE AND MERGED TO main. Merge commits: foundation+score fce144a; Module 1 Adjudication f6d4918; Module 2 Pricing 70b4461; Module 3 EWS 86ca438. main is green: 80/80 backend pytest + 9/9 Playwright (3 adjudication + 3 pricing + 3 ews) + vite build. Working tree clean, on branch main. Next: Module 4 (Proactive Line Increase) — the last module — OR portal_integration (360 view + exec deck). Resume in a fresh session.",
+  "session_status": "PAUSED 2026-06-16 — Module 4 (Proactive Line Increase) COMPLETE on branch build/line-increase, AWAITING USER REVIEW before --no-ff merge to main. Modules 0,1,2,3 already merged to main (foundation+score fce144a; Adjudication f6d4918; Pricing 70b4461; EWS 86ca438). On build/line-increase: 97/97 backend pytest + 12/12 Playwright (3 adj + 3 pricing + 3 ews + 3 line-increase) + vite build ok. Module 4 gate is REAL (AUC 0.8128, lift 2.66x, cohort lower-PD/higher-util, agg incremental ROE 0.215). NOTE: this session sharpened the synthetic line_increase_good target (Option A — pure-leaf, RNG-safe, Modules 0-3 bit-identical & still green) to clear the noise-capped ceiling; data_generator.py changed. After user approves the merge, the ONE remaining phase is portal_integration (cross-module Dashboard + /api/customer/{id} 360 view + exec deck + end-to-end Playwright).",
   "resume_command": "Open the BusinessBankingApp workspace and say: 'resume the business banking build' (Claude reads program_state.json + the latest SESSION_LOG.md entry, prints the status board, and continues from next_action). To jump straight to the next module say: 'resume the business banking build — start Module 4 (Proactive Line Increase)'.",
-  "verify_main_command": "cd /Users/aayan/zzLearnAndCreate/BusinessBankingApp && ./.venv/bin/pytest -q   (expect 80 passed); for the UI: ./.venv/bin/uvicorn portal.server.main:app --port 8100  +  (cd portal/client && npm run dev) -> http://localhost:5180",
-  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing", "portfolio_ews"],
-  "next_action": "START Module 4 — Proactive Line Increase (the last of the 4 apps). Pattern to mirror (same as Modules 1-3): brainstorm -> sub-spec (docs/superpowers/specs/) -> plan (docs/superpowers/plans/) -> subagent-driven build on a new branch build/line-increase, two-stage review per task, then stop for user review before --no-ff merge to main. Per the master spec (Module 4): LightGBM candidate/uplift model for 'good line-increase candidate' on portfolio.parquet target line_increase_good (~22.9% rate) + amount rules + an INCREMENTAL ROE gate that REUSES pricing/src/engine.py (price the extra exposure, require incremental ROE >= hurdle) + portal module (Candidates list, Simulate what-if, Segments) added as the 4th active nav module (it's currently a disabled 'Line Increase' stub in portal/client/src/components/Sidebar.jsx DISABLED_ITEMS). Reuse: score/src/predict (modeled PD), adjudication/src/reason_codes.top_adverse_shap, shared LEAKAGE_COLUMNS (line_increase_good is itself a leakage col for OTHER models but is THIS module's target). ALTERNATIVE if preferred: portal_integration (cross-module Dashboard + GET /api/customer/{id} 360 view + executive deck + end-to-end Playwright). Keep the per-task subagent token tally as in prior sessions. EWS carry-forward: deterioration target is noise-capped (oracle ~0.70 AUC); Option A in ews/docs/enhancement_notes.md sharpens it to >=3x lift, deferred + verified safe for merged modules.",
+  "verify_main_command": "cd /Users/aayan/zzLearnAndCreate/BusinessBankingApp && ./.venv/bin/pytest -q   (expect 97 passed on build/line-increase; 80 on main until merged); UI e2e: (cd portal/client && npx playwright test) expect 12; manual UI: ./.venv/bin/uvicorn portal.server.main:app --port 8100  +  (cd portal/client && npm run dev) -> http://localhost:5180",
+  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing", "portfolio_ews", "line_increase"],
+  "next_action": "FIRST: user reviews branch build/line-increase, then merge it to main with --no-ff (git checkout main && git merge --no-ff build/line-increase). Verify on main: ./.venv/bin/pytest -q (expect 97) + (cd portal/client && npx playwright test) (expect 12). THEN START the final phase — portal_integration: cross-module Dashboard (currently a placeholder), GET /api/customer/{id} 360 view aggregating Score+Adjudication+Pricing+EWS+LineIncrease for one business, an executive deck/README, and end-to-end Playwright across all 4 modules. Pattern: brainstorm -> sub-spec -> plan -> subagent-driven build on branch build/portal-integration, two-stage review, stop before --no-ff merge. Reuse the cached app.state populations in portal/server/main.py. Keep the per-task subagent token tally. CARRY-FORWARD: (a) Module 4 sharpened the line_increase_good DGP (Option A) — if data is ever regenerated, that change is in shared/data_generator.py and is RNG-safe (pure leaf). (b) EWS deterioration target remains noise-capped (oracle ~0.70); ews/docs/enhancement_notes.md Option A is still deferred.",
   "phases": [
     {
       "id": "foundation",
@@ -174,16 +174,42 @@
     },
     {
       "id": "line_increase",
-      "title": "Module 4 — Proactive Line Increase (uplift + ROE gate)",
-      "status": "pending",
+      "title": "Module 4 — Proactive Line Increase (candidate model + amount rules + incremental ROE gate)",
+      "status": "completed",
       "tasks": [
-        { "id": "subspec", "desc": "Write line-increase sub-spec + plan", "done": false },
-        { "id": "model",   "desc": "Candidate model + amount rules", "done": false },
-        { "id": "roe",     "desc": "Incremental ROE gate (ties to Pricing engine)", "done": false },
-        { "id": "portal",  "desc": "Line-increase module views (candidates, simulate)", "done": false },
-        { "id": "gate",    "desc": "Metric gate + Playwright", "done": false }
+        { "id": "subspec", "desc": "Write line-increase sub-spec + plan", "done": true },
+        { "id": "model",   "desc": "LightGBM candidate model + amount rules + positive-SHAP reasons", "done": true },
+        { "id": "roe",     "desc": "Incremental ROE gate (reuses pricing/src/engine.py) + risk-appetite PD ceiling", "done": true },
+        { "id": "portal",  "desc": "Line-increase module views (lookup+what-if, candidates, segments) + four-module nav", "done": true },
+        { "id": "gate",    "desc": "Real metric gate + 97 backend tests + 12 Playwright", "done": true }
       ],
-      "metrics": {}, "artifacts": [], "completed_at": null
+      "metrics": {
+        "auc": 0.8128, "top20_lift": 2.659, "base_rate": 0.2219,
+        "gate": "AUC>=0.78, top20_lift>=2.0, cohort_pd<book_pd, cohort_util>book_util, agg_incremental_roe>=hurdle",
+        "n_offered": 95, "offer_threshold": 0.3121, "offer_max_pd": 0.0741,
+        "cohort_pd": 0.0363, "book_pd": 0.1171, "cohort_util": 0.8371, "book_util": 0.4714,
+        "agg_incremental_roe": 0.2153, "roe_hurdle": 0.15,
+        "backend_tests_total": 97, "playwright_tests_total": 12, "vite_build": "ok",
+        "dgp_note": "Option A: line_increase_good target sharpened (pure-leaf column, RNG-safe) from oracle-AUC ~0.66 (noise-capped) to achievable ~0.84; businesses/panel + all other portfolio cols bit-identical (Modules 0-3 stay green)."
+      },
+      "artifacts": [
+        "docs/superpowers/specs/2026-06-16-line-increase-design.md",
+        "docs/superpowers/plans/2026-06-16-line-increase.md",
+        "shared/config.py (LINE_INCREASE block: target_util, pct_cap, revenue_mult_cap, offer_quantile, max_pd_quantile, roe_hurdle)",
+        "shared/data_generator.py (sharpened line_increase_good logit — Option A)",
+        "line_increase/src/{feature_engineering,amount_rules,train,candidates}.py",
+        "line_increase/models/metadata.json + line_increase_model.pkl (gitignored)",
+        "line_increase/docs/validation_report.md",
+        "line_increase/tests/{test_amount_rules,test_roe_gate,test_model_gate}.py",
+        "portal/server/line_increase_service.py + main.py (4 routes) + schemas.py (Module 4 models)",
+        "portal/server/tests/test_line_increase_api.py",
+        "portal/client/src/views/line_increase/{LineIncreaseLookupView,LineIncreaseCandidatesView,LineIncreaseSegmentsView}.jsx",
+        "portal/client/src/components/Sidebar.jsx + App.jsx (four-module nav) + lib/{api,hooks}.js",
+        "portal/client/e2e/line_increase.spec.js",
+        "pytest.ini (added line_increase/tests)"
+      ],
+      "completed_at": "2026-06-16",
+      "review": "Subagent-driven, 10 tasks (T1-T10), two-stage review each (some trivial config/test tasks controller-verified). T4 hit a genuine BLOCK (target Bernoulli-noise-capped, oracle AUC ~0.66 — independently verified). User chose Option A (targeted safe DGP sharpen): re-tuned ONLY the pure-leaf line_increase_good logit to lean on observable drivers with less noise, RNG call structure unchanged so per-column hashes prove businesses/panel + all other portfolio cols bit-identical; Modules 0-3 stayed green. Added a risk-appetite modeled-PD ceiling so the offered cohort is genuinely lower-risk. Awaiting user review before --no-ff merge. Branch build/line-increase."
     },
     {
       "id": "portal_integration",
