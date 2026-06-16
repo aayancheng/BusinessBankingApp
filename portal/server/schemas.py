@@ -195,3 +195,73 @@ class EwsSegmentRow(BaseModel):
 class EwsSegments(BaseModel):
     by_band: list[EwsSegmentRow]
     by_industry: list[EwsSegmentRow]
+
+
+# --- Proactive Line Increase (Module 4) ---
+class IncrementalRoe(BaseModel):
+    incremental_ead: float
+    incremental_net_income: float
+    roe: float
+    clears_hurdle: bool
+    hurdle_clearing_rate: float
+
+
+class LineIncreaseDetail(BaseModel):
+    business_id: str
+    industry: str
+    score_band: str
+    pd: float
+    prob: float
+    eligible: bool
+    credit_limit: float
+    current_balance: float
+    utilization_onbook: float
+    recommended_amount: float
+    post_increase_utilization: float
+    rate: float
+    incremental: IncrementalRoe
+    waterfall: WaterfallLine
+    top_shap_reasons: list[ReasonItem]
+
+
+class LineIncreaseCandidate(BaseModel):
+    business_id: str
+    industry: str
+    score_band: str
+    prob: float
+    recommended_amount: float
+    incremental_ead: float
+    incremental_roe: float
+    clears_hurdle: bool
+
+
+class PaginatedCandidates(BaseModel):
+    items: list[LineIncreaseCandidate]
+    page: int
+    pages: int
+    total: int
+
+
+class SimulateRequest(BaseModel):
+    business_id: str
+    proposed_amount: float | None = None
+    target_util: float | None = None
+
+
+class SimulateResponse(BaseModel):
+    business_id: str
+    proposed_amount: float
+    incremental: IncrementalRoe
+    waterfall: WaterfallLine
+
+
+class LineIncreaseSegmentRow(BaseModel):
+    key: str
+    offer_rate: float
+    expected_incremental_exposure: float
+    count: int
+
+
+class LineIncreaseSegments(BaseModel):
+    by_band: list[LineIncreaseSegmentRow]
+    by_industry: list[LineIncreaseSegmentRow]
