@@ -57,3 +57,16 @@ ADJ_POLICY = {
     "req_to_rev_cap": 0.75, # requested_amount / annual_revenue > cap -> Refer
     "score_floor": 600,     # approve-zone pd but business_score < floor -> Refer
 }
+
+# Early-Warning trigger thresholds (Module 3) — named behavioral rules.
+EWS_TRIGGERS = {
+    "high_utilization": 0.90,    # util_recent > this
+    "rising_utilization": 0.15,  # util_drift > this
+    "dpd_severe": 30,            # dpd_max >= this (or dpd_recent > 0)
+    "deposit_decline": 0.30,     # deposit_decline_pct > this
+    "overdraft_recent": 3,       # overdraft_recent >= this
+}
+
+# Early-Warning risk-tier cutoffs on predicted deterioration probability.
+# Seed values; re-calibrated from the score distribution at train time.
+EWS_TIERS = {"t_high": 0.40, "t_med": 0.20}
