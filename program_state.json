@@ -13,10 +13,10 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "session_status": "AWAITING REVIEW 2026-06-15 — Module 1 Adjudication COMPLETE on branch build/adjudication: backend (model+policy+reason codes, AUC 0.810/lift 2.86x) + portal (FastAPI 5 routes + React 3-view UI + Dashboard, Vite-direct proxy). 46/46 backend tests + 3/3 Playwright + vite build all green. NOT merged to main — awaiting user review (mirror Phase 0/Score review->merge flow).",
+  "session_status": "AWAITING REVIEW 2026-06-15 — Module 2 Pricing & Profitability COMPLETE on branch build/pricing: analytical ROE/RAROC engine (waterfall + hurdle-clearing/recommended rate solvers + mispricing) + portal pricing module (FastAPI 3 routes + React 3-view UI, two-module nav refactor). 61/61 backend tests + 6/6 Playwright (3 adj + 3 pricing) + vite build all green. NOT merged to main — awaiting user review. (Module 1 Adjudication already merged to main via f6d4918.)",
   "resume_command": "Open the BusinessBankingApp workspace and say: resume the business banking build",
-  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal"],
-  "next_action": "Review + merge build/adjudication to main. THEN choose next: (A) Phase Pricing (Module 2, ROE/RAROC engine) — recommended next module; or (B) backfill the Score module's portal views into the shared portal (now scaffolded); or (C) cross-module Dashboard + /api/customer/{id} 360 view. Confirm with user. Carry-forward (unchanged): adjudication decision mix is conservative (Approve 30.8%/Refer 36.8%/Decline 32.4%) because hard knockouts dominate (dscr<1.0 fires on ~21% of synthetic applicants); to match the ~70% book intent regenerate the DGP with lower dscr<1.0 prevalence or make knockouts configurable. Portal scaffold is extensible: adding a module = new FastAPI router + service + Sidebar entry (currently a disabled stub) + 3 views.",
+  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing"],
+  "next_action": "Review + merge build/pricing to main. THEN choose next module: (A) Module 3 Portfolio Management & Early Warning (LightGBM deterioration model on the 24-mo behavioral panel + trigger flags + watchlist) — recommended; or (B) Module 4 Proactive Line Increase (uplift candidate + incremental ROE gate, ties to the Pricing engine); or (C) backfill the Score module's portal views. Confirm with user. Pricing carry-forward: only 30.4% of booked loans clear the 15% ROE hurdle at their quoted (DGP) rate (median ROE 10.9%, $1.28B mispriced EAD) — a realistic finding driven by modeled-PD vs DGP pricing; the engine correctly surfaces it. Adjudication carry-forward unchanged (conservative decision mix from dscr<1.0 knockout prevalence).",
   "phases": [
     {
       "id": "foundation",
@@ -105,15 +105,38 @@
     {
       "id": "pricing",
       "title": "Module 2 — Pricing & Profitability (ROE engine)",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
-        { "id": "subspec", "desc": "Write pricing sub-spec + plan", "done": false },
-        { "id": "engine",  "desc": "EL pricing + ROE/RAROC waterfall engine", "done": false },
-        { "id": "hurdle",  "desc": "ROE hurdle test + mispricing detection", "done": false },
-        { "id": "portal",  "desc": "Pricing module views (waterfall, what-if, portfolio)", "done": false },
-        { "id": "gate",    "desc": "Engine validation + Playwright", "done": false }
+        { "id": "subspec", "desc": "Write pricing sub-spec + plan", "done": true },
+        { "id": "engine",  "desc": "EL pricing + ROE/RAROC waterfall engine", "done": true },
+        { "id": "hurdle",  "desc": "ROE hurdle test + mispricing detection", "done": true },
+        { "id": "portal",  "desc": "Pricing module views (waterfall, what-if, portfolio) + two-module nav", "done": true },
+        { "id": "gate",    "desc": "Engine validation (9 tests, machine-precision) + Playwright (6/6)", "done": true }
       ],
-      "metrics": {}, "artifacts": [], "completed_at": null
+      "metrics": {
+        "engine_tests": 9, "portfolio_tests": 2, "pricing_api_tests": 4,
+        "backend_tests_total": 61, "playwright_tests": 6, "vite_build": "ok",
+        "booked_priced": 8336, "share_clears_hurdle": 0.304, "median_roe_at_quoted": 0.109,
+        "mispriced_ead": 1276148000, "roe_hurdle": 0.15
+      },
+      "artifacts": [
+        "docs/superpowers/specs/2026-06-15-pricing-design.md",
+        "docs/superpowers/plans/2026-06-15-pricing.md",
+        "pricing/src/engine.py",
+        "pricing/src/portfolio.py",
+        "pricing/tests/{test_engine,test_portfolio}.py",
+        "pricing/docs/validation_report.md",
+        "portal/server/pricing_service.py",
+        "portal/server/main.py (+3 pricing routes, lifespan caches priced pop)",
+        "portal/server/schemas.py (+pricing models)",
+        "portal/server/tests/test_pricing_api.py",
+        "portal/client/src/components/{Waterfall,PassFailBadge}.jsx",
+        "portal/client/src/components/Sidebar.jsx + App.jsx (two-module nav)",
+        "portal/client/src/views/pricing/{PricingLookupView,PricingWhatIfView,PricingPortfolioView}.jsx",
+        "portal/client/e2e/pricing.spec.js"
+      ],
+      "completed_at": "2026-06-15",
+      "review": "Subagent-driven, 8 tasks (T1-T8), two-stage review each, all APPROVED. Engine math independently verified to machine precision. Nav refactored to host two active modules; adjudication e2e back-compat proven. Finding: only 30.4% of booked loans clear the ROE hurdle at quoted rate."
     },
     {
       "id": "portfolio_ews",

@@ -224,3 +224,76 @@ one implementer + one combined spec+quality reviewer per task.
 `main`** (mirrors prior phases). Branch `build/adjudication`.
 
 **Resume:** open `BusinessBankingApp` and say "resume the business banking build".
+
+---
+
+## Session 4 — 2026-06-15 — Module 2 Pricing & Profitability (engine + portal)
+
+**Scope (user-confirmed):** engine + portal in one session; EAD = requested_amount, quoted
+rate = risk_based_rate (DGP), PD from the Module 0 scorecard. Brainstorm → sub-spec → plan →
+subagent-driven build (8 tasks T1–T8), one implementer + one combined spec+quality reviewer
+per task. (Module 1 was merged to `main` via merge commit f6d4918 at the start of the session.)
+
+**Built:**
+- **Engine `pricing/src/engine.py`** — `MarketAssumptions` (frozen, overridable) + profit
+  waterfall (interest − COF − EL − opex = pre-tax; net = pre-tax·(1−tax); ROE = net/equity,
+  RAROC = pre-tax/equity) + closed-form `break_even_rate` / `hurdle_clearing_rate` /
+  `recommended_rate` (= hurdle-clearing + base_margin) + `price_loan` (mispricing flag).
+  Pure, deterministic; **9 tests, math independently verified to machine precision**.
+- **Portfolio `pricing/src/portfolio.py`** — prices the 8,336 booked loans (PD via scorecard),
+  `portfolio_summary`, validation report.
+- **Portal backend** — `pricing_service.py` + 3 routes (`/api/pricing/{id}`, `/portfolio`,
+  `POST /quote`); lifespan caches the priced population (~3.8s startup, no adjudication
+  regression). 4 API tests.
+- **Portal frontend** — Waterfall + PassFailBadge components; **Sidebar/App nav refactor to a
+  two-module layout** (Adjudication + Pricing groups) that PRESERVES the existing adjudication
+  testids (back-compat proven by re-running the adjudication e2e); 3 pricing views.
+- **Playwright** — `pricing.spec.js` (3 tests); full gate runs **6/6** (3 adjudication + 3
+  pricing).
+
+**Gates:** **61/61 backend pytest**, **6/6 Playwright**, **vite build ok**.
+
+**Finding (in the validation report):** only **30.4%** of booked loans clear the 15% ROE
+hurdle at their quoted rate (median ROE 10.9%, **$1.28B mispriced EAD**). This is a legitimate
+result — it reflects the modeled scorecard PD vs the DGP-set rates, exactly the mispricing the
+engine is built to surface. Worst-priced bands are AAA (80%) and A (73%): prime loans get low
+quoted rates that miss the ~6.9% capital-charge floor.
+
+**Subagent token tally (Module 2) — for evaluating the subagent design:**
+
+| Task | Role | Model | Tokens | Outcome |
+|------|------|-------|-------:|---------|
+| T1 engine | impl | sonnet | 41,091 | DONE → APPROVED |
+| T1 engine | review | sonnet | 49,005 | APPROVED (math verified to machine precision) |
+| T2 portfolio | impl | sonnet | 40,868 | DONE → APPROVED (+2 controller nits) |
+| T2 portfolio | review | sonnet | 49,054 | APPROVED (30.4% clear-rate verified legit) |
+| T3 backend routes | impl | sonnet | 47,300 | DONE → APPROVED |
+| T3 backend routes | review | sonnet | 52,833 | APPROVED (3.8s startup, no adj regression) |
+| T4 API tests | impl | haiku | 46,002 | DONE → APPROVED |
+| T4 API tests | review | haiku | 43,225 | APPROVED |
+| T5 data + nav | impl | sonnet | 61,882 | DONE → APPROVED |
+| T5 data + nav | review | sonnet | 56,404 | APPROVED (adj e2e back-compat proven) |
+| T6 views | impl | sonnet | 41,152 | DONE → APPROVED |
+| T6 views | review | sonnet | 55,093 | APPROVED (API field names correct) |
+| T7 playwright | impl | sonnet | 50,708 | DONE → APPROVED (6/6 e2e) |
+| T7 playwright | review | haiku | 38,963 | APPROVED (re-ran 6/6) |
+
+- **Module 2 total: 673,580 tokens / 14 dispatches** (impl 329,003 + review 344,577).
+- By model: sonnet 545,390 (11), haiku 128,190 (3).
+- **14/14 dispatches clean** — zero CHANGES-REQUESTED this module (the complete-code plan +
+  machine-verifiable engine made implementers near-exact). T2 got 2 trivial controller-applied
+  nits (unused import, path anchoring).
+- **Program cumulative: ~1,615,606 tokens** across Adjudication backend (407k) + Adjudication
+  portal (535k) + Pricing (674k); 40 subagent dispatches total.
+- **Design takeaways:** (a) analytical/deterministic modules are the cheapest and cleanest to
+  drive — the engine review verified correctness to 1e-16 in one pass, no iteration. (b) The
+  most valuable review this module was T5 (nav refactor): re-running the *existing* adjudication
+  e2e proved the refactor didn't regress a shipped feature — spend review budget on changes that
+  touch already-merged surfaces. (c) Reviews again cost ≈ implementations (345k vs 329k); for
+  full-code-spec tasks a lighter review tier is defensible, but the back-compat and math
+  verifications justified the spend here.
+
+**Status:** Module 2 complete (engine + portal). **Awaiting user review before merge to `main`.**
+Branch `build/pricing`.
+
+**Resume:** open `BusinessBankingApp` and say "resume the business banking build".
