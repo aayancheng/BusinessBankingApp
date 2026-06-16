@@ -13,10 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from portal.server import service
 from portal.server import pricing_service
+from portal.server import ews_service
 from portal.server.schemas import (
     AdjudicationDetail, DecideRequest, HealthResponse,
     PaginatedApplications, SegmentsResponse,
     PricingDetail, QuoteRequest, QuoteResponse, PricingPortfolio,
+    EwsDetail, WatchlistItem, EwsSegments,
 )
 
 
@@ -30,6 +32,7 @@ async def lifespan(app: FastAPI):
     app.state.baseline = service.baseline_row()
     app.state.pop = service.score_population(model, config, explainer)
     app.state.pricing_pop = pricing_service.load_population()
+    app.state.ews_pop = ews_service.load_population()
     yield
 
 
@@ -93,6 +96,24 @@ def pricing_quote(req: QuoteRequest):
 @app.get("/api/pricing/{business_id}", response_model=PricingDetail)
 def pricing_detail(business_id: str):
     rec = pricing_service.detail_record(business_id, app.state.pricing_pop)
+    if rec is None:
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
+    return rec
+
+
+@app.get("/api/ews/watchlist", response_model=list[WatchlistItem])
+def ews_watchlist(limit: int = 100):
+    return ews_service.watchlist(app.state.ews_pop, limit=limit)
+
+
+@app.get("/api/ews/segments", response_model=EwsSegments)
+def ews_segments():
+    return ews_service.segments(app.state.ews_pop)
+
+
+@app.get("/api/ews/{business_id}", response_model=EwsDetail)
+def ews_detail(business_id: str):
+    rec = ews_service.detail_record(business_id, app.state.ews_pop)
     if rec is None:
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
     return rec
