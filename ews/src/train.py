@@ -1,5 +1,6 @@
 """Train the EWS LightGBM deterioration model, calibrate risk-tier cutoffs, persist
-artifacts + report, enforce the gate (top-decile capture >= 3x, AUC >= 0.75)."""
+artifacts + report, enforce the gate (top-decile capture >= 2x lift, PR-AUC > base rate).
+Option B: AUC reported (not gated); sanity floor 0.60. See ews/docs/enhancement_notes.md."""
 import json
 from datetime import datetime, timezone
 from pathlib import Path
