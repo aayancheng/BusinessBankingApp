@@ -1,6 +1,7 @@
 """EWS feature engineering: aggregate the 24-month behavioral panel into per-account
 trend features, then join modeled score/PD + on-book/firmographic columns. Leakage-safe."""
-import numpy as np
+from functools import lru_cache
+
 import pandas as pd
 
 from shared.config import RAW, LEAKAGE_COLUMNS
@@ -51,9 +52,14 @@ def compute_panel_features(panel: pd.DataFrame) -> pd.DataFrame:
     return pf
 
 
+@lru_cache(maxsize=1)
+def _cached_panel_features() -> pd.DataFrame:
+    """panel.parquet is static; aggregate it once per process (the groupby is the hot path)."""
+    return compute_panel_features(pd.read_parquet(RAW / "panel.parquet"))
+
+
 def compute_ews_features(portfolio: pd.DataFrame) -> pd.DataFrame:
-    panel = pd.read_parquet(RAW / "panel.parquet")
-    pf = compute_panel_features(panel)
+    pf = _cached_panel_features()
     out = portfolio.merge(pf, on="business_id", how="left")
 
     sp = predict_score_pd(out)
