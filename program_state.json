@@ -13,10 +13,10 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "session_status": "AWAITING REVIEW 2026-06-15 — Module 2 Pricing & Profitability COMPLETE on branch build/pricing: analytical ROE/RAROC engine (waterfall + hurdle-clearing/recommended rate solvers + mispricing) + portal pricing module (FastAPI 3 routes + React 3-view UI, two-module nav refactor). 61/61 backend tests + 6/6 Playwright (3 adj + 3 pricing) + vite build all green. NOT merged to main — awaiting user review. (Module 1 Adjudication already merged to main via f6d4918.)",
+  "session_status": "AWAITING REVIEW 2026-06-15 — Module 3 Portfolio & Early Warning COMPLETE on branch build/ews: LightGBM deterioration model on the 24-mo panel (top-decile capture 2.16x, PR-AUC 0.308>base; AUC 0.66 reported) + named trigger flags + risk-tier watchlist + portal EWS module (FastAPI 3 routes incl. trajectory + React 3-view UI, three-module nav). 80/80 backend tests + 9/9 Playwright (3 adj + 3 pricing + 3 ews) + vite build all green. Gate set via Option B (honest, data-supported) — see ews/docs/enhancement_notes.md for the deferred Option-A signal-sharpening enhancement. NOT merged to main — awaiting user review. (Modules 1+2 merged to main via f6d4918, 70b4461.)",
   "resume_command": "Open the BusinessBankingApp workspace and say: resume the business banking build",
-  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing"],
-  "next_action": "Review + merge build/pricing to main. THEN choose next module: (A) Module 3 Portfolio Management & Early Warning (LightGBM deterioration model on the 24-mo behavioral panel + trigger flags + watchlist) — recommended; or (B) Module 4 Proactive Line Increase (uplift candidate + incremental ROE gate, ties to the Pricing engine); or (C) backfill the Score module's portal views. Confirm with user. Pricing carry-forward: only 30.4% of booked loans clear the 15% ROE hurdle at their quoted (DGP) rate (median ROE 10.9%, $1.28B mispriced EAD) — a realistic finding driven by modeled-PD vs DGP pricing; the engine correctly surfaces it. Adjudication carry-forward unchanged (conservative decision mix from dscr<1.0 knockout prevalence).",
+  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing", "portfolio_ews"],
+  "next_action": "Review + merge build/ews to main. THEN choose next: (A) Module 4 Proactive Line Increase (uplift candidate + incremental ROE gate, ties to the Pricing engine) — the last module; or (B) portal_integration (cross-module Dashboard + /api/customer/{id} 360 view + exec deck + end-to-end Playwright). Confirm with user. EWS carry-forward: the synthetic deterioration target is noise-capped (oracle ~0.70 AUC), so the EWS gate is honest-but-modest (2.16x top-decile lift); Option A in ews/docs/enhancement_notes.md (reduce DGP noise + regenerate) lifts it to >=3x for a stronger demo — deferred, verified safe for already-merged modules.",
   "phases": [
     {
       "id": "foundation",
@@ -141,15 +141,35 @@
     {
       "id": "portfolio_ews",
       "title": "Module 3 — Portfolio Management & Early Warning",
-      "status": "pending",
+      "status": "completed",
       "tasks": [
-        { "id": "subspec", "desc": "Write EWS sub-spec + plan", "done": false },
-        { "id": "panel",   "desc": "Behavioral panel features (trends)", "done": false },
-        { "id": "model",   "desc": "LightGBM deterioration model + trigger flags", "done": false },
-        { "id": "portal",  "desc": "EWS module views (trajectory, watchlist, segments)", "done": false },
-        { "id": "gate",    "desc": "Metric gate + Playwright", "done": false }
+        { "id": "subspec", "desc": "Write EWS sub-spec + plan", "done": true },
+        { "id": "panel",   "desc": "Behavioral panel features (trends, cached)", "done": true },
+        { "id": "model",   "desc": "LightGBM deterioration model + trigger flags + risk-tier watchlist", "done": true },
+        { "id": "portal",  "desc": "EWS module views (trajectory, watchlist, segments) + three-module nav", "done": true },
+        { "id": "gate",    "desc": "Honest gate (capture>=2x, PR-AUC>base) + 80 backend tests + 9 Playwright", "done": true }
       ],
-      "metrics": {}, "artifacts": [], "completed_at": null
+      "metrics": {
+        "top_decile_capture": 0.216, "top_decile_lift": 2.16, "pr_auc": 0.308, "auc": 0.6622,
+        "base_rate": 0.18, "gate": "Option B (capture>=2x lift, PR-AUC>base; AUC reported)",
+        "risk_tiers": { "t_high": 0.5073, "t_med": 0.1649 },
+        "backend_tests_total": 80, "playwright_tests_total": 9, "vite_build": "ok"
+      },
+      "artifacts": [
+        "docs/superpowers/specs/2026-06-15-ews-design.md",
+        "docs/superpowers/plans/2026-06-15-ews.md",
+        "shared/config.py (EWS_TRIGGERS, EWS_TIERS)",
+        "ews/src/{feature_engineering,triggers,train,watchlist}.py",
+        "ews/models/metadata.json + ews_model.pkl (gitignored)",
+        "ews/docs/validation_report.md + enhancement_notes.md",
+        "portal/server/ews_service.py + main.py (3 routes) + schemas.py (EWS models)",
+        "portal/server/tests/test_ews_api.py",
+        "portal/client/src/components/{RiskTrajectory,RiskTierBadge}.jsx",
+        "portal/client/src/views/ews/{EwsLookupView,EwsWatchlistView,EwsSegmentsView}.jsx",
+        "portal/client/e2e/ews.spec.js"
+      ],
+      "completed_at": "2026-06-15",
+      "review": "Subagent-driven, 9 tasks, two-stage review each. T4 trainer hit a real BLOCK (synthetic deterioration target noise-capped at oracle ~0.70 AUC); user chose Option B (honest gate: capture>=2x lift, PR-AUC>base, AUC reported). Option A (sharpen DGP signal, regenerate) documented in ews/docs/enhancement_notes.md, deferred. Panel features cached (lru_cache) after a perf review. Three-module nav back-compat proven (adj+pricing e2e still pass)."
     },
     {
       "id": "line_increase",
