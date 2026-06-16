@@ -29,3 +29,12 @@ export async function fetchPricingPortfolio() {
 export async function pricingQuote(payload) {
   return (await api.post('/api/pricing/quote', payload)).data;
 }
+export async function fetchEws(id) {
+  return (await api.get(`/api/ews/${id}`)).data;
+}
+export async function fetchEwsWatchlist(limit = 100) {
+  return (await api.get('/api/ews/watchlist', { params: { limit } })).data;
+}
+export async function fetchEwsSegments() {
+  return (await api.get('/api/ews/segments')).data;
+}

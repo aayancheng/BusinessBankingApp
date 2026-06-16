@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote } from './api';
+import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments } from './api';
 
 function asError(e) {
   return e.response?.data?.detail || { error: 'unknown', message: 'Request failed' };
@@ -90,4 +90,38 @@ export function usePricingQuote() {
     try { setData(await pricingQuote(payload)); } finally { setLoading(false); }
   }, []);
   return { data, loading, run };
+}
+
+export function useEws() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const lookup = useCallback(async (id) => {
+    if (!id) return;
+    setLoading(true); setError(null);
+    try { setData(await fetchEws(id)); }
+    catch (e) { setData(null); setError(e.response?.data?.detail || { message: 'Request failed' }); }
+    finally { setLoading(false); }
+  }, []);
+  return { data, error, loading, lookup };
+}
+
+export function useEwsWatchlist() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setData(await fetchEwsWatchlist(100)); } finally { setLoading(false); }
+  }, []);
+  return { data, loading, load };
+}
+
+export function useEwsSegments() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setData(await fetchEwsSegments()); } finally { setLoading(false); }
+  }, []);
+  return { data, loading, load };
 }

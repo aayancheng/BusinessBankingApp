@@ -7,9 +7,13 @@ import SegmentsView from './views/SegmentsView';
 import PricingLookupView from './views/pricing/PricingLookupView';
 import PricingWhatIfView from './views/pricing/PricingWhatIfView';
 import PricingPortfolioView from './views/pricing/PricingPortfolioView';
+import EwsLookupView from './views/ews/EwsLookupView';
+import EwsWatchlistView from './views/ews/EwsWatchlistView';
+import EwsSegmentsView from './views/ews/EwsSegmentsView';
 import {
   useApplication, useDecide, useSegments, useHealth,
   usePricing, usePricingPortfolio, usePricingQuote,
+  useEws, useEwsWatchlist, useEwsSegments,
 } from './lib/hooks';
 
 export default function App() {
@@ -21,6 +25,9 @@ export default function App() {
   const pricing = usePricing();
   const pricingPortfolio = usePricingPortfolio();
   const pricingQuoteHook = usePricingQuote();
+  const ews = useEws();
+  const ewsWatch = useEwsWatchlist();
+  const ewsSeg = useEwsSegments();
 
   const onNavigate = (module, view) => setNav({ module, view });
   const is = (m, v) => nav.module === m && nav.view === v;
@@ -36,6 +43,9 @@ export default function App() {
         {is('pricing', 'lookup') && <PricingLookupView hook={pricing} />}
         {is('pricing', 'whatif') && <PricingWhatIfView hook={pricingQuoteHook} />}
         {is('pricing', 'portfolio') && <PricingPortfolioView hook={pricingPortfolio} />}
+        {is('ews', 'lookup') && <EwsLookupView hook={ews} />}
+        {is('ews', 'watchlist') && <EwsWatchlistView hook={ewsWatch} />}
+        {is('ews', 'segments') && <EwsSegmentsView hook={ewsSeg} />}
       </main>
     </div>
   );

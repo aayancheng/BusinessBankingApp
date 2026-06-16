@@ -157,3 +157,41 @@ class PricingPortfolio(BaseModel):
     roe_hurdle: float
     by_band: list[PricingSegmentRow]
     by_industry: list[PricingSegmentRow]
+
+
+# --- Early Warning (Module 3) ---
+class TrajectoryPoint(BaseModel):
+    month_index: int
+    utilization: float
+    days_past_due: float
+    balance: float
+
+
+class EwsDetail(BaseModel):
+    business_id: str
+    industry: str
+    prob: float
+    risk_tier: str
+    triggers: list[str]
+    top_shap_reasons: list[ReasonItem]
+    key_metrics: dict
+    trajectory: list[TrajectoryPoint]
+
+
+class WatchlistItem(BaseModel):
+    business_id: str
+    industry: str
+    prob: float
+    risk_tier: str
+    triggers: list[str]
+
+
+class EwsSegmentRow(BaseModel):
+    key: str
+    deterioration_rate: float
+    count: int
+
+
+class EwsSegments(BaseModel):
+    by_band: list[EwsSegmentRow]
+    by_industry: list[EwsSegmentRow]

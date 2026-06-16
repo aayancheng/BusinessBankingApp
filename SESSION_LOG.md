@@ -297,3 +297,76 @@ quoted rates that miss the ~6.9% capital-charge floor.
 Branch `build/pricing`.
 
 **Resume:** open `BusinessBankingApp` and say "resume the business banking build".
+
+---
+
+## Session 5 — 2026-06-15 — Module 3 Portfolio & Early Warning (EWS)
+
+**Scope (user-confirmed):** backend + portal in one session; full 24-mo panel as observation
+history. Subagent-driven, 9 tasks (T1–T9), one implementer + one combined spec+quality
+reviewer per task. (Modules 1+2 merged to main via f6d4918, 70b4461 earlier in the program.)
+
+**Built:**
+- **Panel features `ews/src/feature_engineering.py`** — per-account behavioral trends from the
+  24-mo panel (util drift/volatility, deposit decline, DPD counts, overdrafts) + on-book +
+  modeled score/PD. `lru_cache` on the static panel aggregation (after a perf review).
+- **Triggers `ews/src/triggers.py`** — 5 named rules (HIGH_UTILIZATION, RISING_UTILIZATION,
+  DELINQUENCY, DEPOSIT_DECLINE, FREQUENT_OVERDRAFTS), pure/vectorized.
+- **Model `ews/src/train.py` + watchlist** — LightGBM on deterioration_next_6_12mo + SHAP;
+  risk tiers (High/Med/Low, calibrated) + ranked watchlist; reuses `top_adverse_shap`.
+- **Portal** — `ews_service.py` + 3 routes (`/api/ews/{id}` with the 24-mo trajectory,
+  `/watchlist`, `/segments`); lifespan caches the scored population. RiskTrajectory (Recharts
+  line) + RiskTierBadge components; 3 views; **three-module nav** (Adjudication + Pricing +
+  Early Warning). API tests.
+- **Playwright** `ews.spec.js` (3) — full gate runs **9/9** (3 adj + 3 pricing + 3 ews).
+
+**Gate decision (Option B):** the trainer hit a genuine BLOCK — the synthetic
+`deterioration_next_6_12mo` label is noise-capped (logit noise + Bernoulli draw → verified
+oracle ceiling ~0.70 AUC), so AUC>=0.75 / capture>=3x are unreachable on the current data.
+Per user direction, the gate was set to what the data honestly supports: **top-decile capture
+>= 2x lift and PR-AUC > base rate**, AUC reported (not gated). Result: **capture 21.6% (2.16x
+lift), PR-AUC 0.308 (base 0.180), AUC 0.662.** A signal-sharpening enhancement (Option A —
+reduce DGP noise + regenerate, verified safe for already-merged modules) is documented in
+`ews/docs/enhancement_notes.md` for the model-whitepaper agent; deferred, not executed.
+
+**Gates:** **80/80 backend pytest**, **9/9 Playwright**, **vite build ok**.
+
+**Subagent token tally (Module 3) — for evaluating the subagent design:**
+
+| Task | Role | Model | Tokens | Outcome |
+|------|------|-------|-------:|---------|
+| T1 config | impl | haiku | 42,935 | DONE; controller-reviewed (trivial append) |
+| T2 panel features | impl | sonnet | 42,850 | DONE → APPROVED (+controller perf cache) |
+| T2 panel features | review | sonnet | 58,676 | APPROVED (agg math bit-exact; flagged perf) |
+| T3 triggers | impl | haiku | 40,132 | DONE → APPROVED |
+| T3 triggers | review | haiku | 35,989 | APPROVED |
+| T4 trainer + watchlist | impl | sonnet | 73,187 | **BLOCKED** (gate unreachable) → controller resolved Option B |
+| T4 trainer + watchlist | review | sonnet | 63,395 | APPROVED (honest gate; +docstring fix) |
+| T5 EWS routes | impl | sonnet | 50,025 | DONE → APPROVED |
+| T5 EWS routes | review | sonnet | 53,460 | APPROVED (no adj/pricing regression) |
+| T6 API tests | impl | haiku | 43,559 | DONE; controller-verified |
+| T7 three-module nav | impl | sonnet | 49,447 | DONE → APPROVED |
+| T7 three-module nav | review | sonnet | 57,642 | APPROVED (adj+pricing back-compat proven) |
+| T8 EWS views | impl | sonnet | 39,007 | DONE → APPROVED |
+| T8 EWS views | review | sonnet | 31,496 | APPROVED (API field names exact) |
+| T9 Playwright | impl | sonnet | 30,833 | DONE (9/9 e2e); controller did ledger/tally |
+
+- **Module 3 total: 712,633 tokens / 15 dispatches** (impl 411,975 + review 300,658).
+- By model: sonnet 550,018 (11), haiku 162,615 (4).
+- **1 genuine BLOCK** (T4): the subagent correctly escalated a data-signal ceiling rather than
+  gaming the gate — the highest-value escalation of the program. The controller resolved it via
+  a user decision (Option B) + an enhancement note. 2 tasks were controller-reviewed/verified
+  (T1 trivial config, T6 test transcription) to save ~2 review dispatches.
+- **Program cumulative: ~2,328,239 tokens** across 5 build sessions (adj backend 407k + adj
+  portal 535k + pricing 674k + ews 713k), ~55 subagent dispatches.
+- **Design takeaways:** (a) the BLOCK is the headline data point — subagents will (and should)
+  escalate when a metric gate is mathematically unreachable; that judgment is worth more than a
+  silently-weakened pass. (b) The panel-feature perf review paid off: caching the static
+  aggregation cut repeated calls from ~2.4s to ~0, which matters once the lifespan + test
+  fixtures call it many times. (c) The third nav refactor again proved its worth by re-running
+  the prior modules' e2e — back-compat verification is the recurring high-value review.
+
+**Status:** Module 3 complete. **Awaiting user review before merge to `main`.** Branch
+`build/ews`.
+
+**Resume:** open `BusinessBankingApp` and say "resume the business banking build".
