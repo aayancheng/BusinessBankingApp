@@ -38,3 +38,9 @@ export const PRICING_WHATIF_DEFAULT = {
   rate: 0.12, pd: 0.05, ead: 150000, cost_of_funds: 0.035, lgd: 0.45,
   capital_ratio: 0.12, opex_rate: 0.01, tax_rate: 0.25,
 };
+
+export const RISK_TIER_COLORS = {
+  High:   { bg: 'bg-rose-100',    text: 'text-rose-800',    dot: 'bg-rose-500' },
+  Medium: { bg: 'bg-amber-100',   text: 'text-amber-800',   dot: 'bg-amber-500' },
+  Low:    { bg: 'bg-emerald-100', text: 'text-emerald-800', dot: 'bg-emerald-500' },
+};

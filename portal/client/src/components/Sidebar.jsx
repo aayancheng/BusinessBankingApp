@@ -12,9 +12,14 @@ const PRICING_ITEMS = [
   { module: 'pricing', view: 'portfolio', testid: 'nav-pricing-portfolio', label: 'Portfolio', icon: PieChart },
 ];
 
+const EWS_ITEMS = [
+  { module: 'ews', view: 'lookup',    testid: 'nav-ews-lookup',    label: 'Lookup',    icon: Search },
+  { module: 'ews', view: 'watchlist', testid: 'nav-ews-watchlist', label: 'Watchlist', icon: AlertTriangle },
+  { module: 'ews', view: 'segments',  testid: 'nav-ews-segments',  label: 'Segments',  icon: PieChart },
+];
+
 const DISABLED_ITEMS = [
   { label: 'Score',         icon: Star },
-  { label: 'Early Warning', icon: AlertTriangle },
   { label: 'Line Increase', icon: TrendingUp },
 ];
 
@@ -75,6 +80,9 @@ export default function Sidebar({ module, view, onNavigate }) {
         <GroupHeader>Pricing</GroupHeader>
         {PRICING_ITEMS.map(NavButton)}
 
+        <GroupHeader>Early Warning</GroupHeader>
+        {EWS_ITEMS.map(NavButton)}
+
         <GroupHeader>Coming soon</GroupHeader>
         {DISABLED_ITEMS.map(({ label, icon: Icon }) => (
           <div
@@ -88,7 +96,7 @@ export default function Sidebar({ module, view, onNavigate }) {
       </nav>
 
       <div className="px-5 py-4 text-[11px] text-slate-500 border-t border-slate-700">
-        Adjudication + Pricing
+        Adjudication + Pricing + Early Warning
       </div>
     </aside>
   );
