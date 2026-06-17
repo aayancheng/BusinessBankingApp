@@ -282,6 +282,8 @@ class Customer360Profile(BaseModel):
     business_id: str
     industry: str
     booked: bool
+    region: Optional[str] = None
+    annual_revenue: Optional[float] = None
 
 
 class Customer360Score(BaseModel):

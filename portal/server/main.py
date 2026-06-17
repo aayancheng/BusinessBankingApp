@@ -8,9 +8,12 @@ from contextlib import asynccontextmanager
 # Make shared/score/adjudication/portal importable when run from anywhere.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import pandas as pd
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from shared.config import RAW
 from portal.server import service
 from portal.server import pricing_service
 from portal.server import ews_service
@@ -39,6 +42,9 @@ async def lifespan(app: FastAPI):
     app.state.pricing_pop = pricing_service.load_population()
     app.state.ews_pop = ews_service.load_population()
     app.state.li_pop = line_increase_service.load_population()
+    app.state.profiles = pd.read_parquet(
+        RAW / "businesses.parquet", columns=["business_id", "region", "annual_revenue"]
+    ).set_index("business_id")
     yield
 
 
@@ -168,7 +174,7 @@ def dashboard_summary_route():
 def customer_360_route(business_id: str):
     rec = customer_service.customer_360(
         business_id, app.state.pop, app.state.pricing_pop,
-        app.state.ews_pop, app.state.li_pop)
+        app.state.ews_pop, app.state.li_pop, app.state.profiles)
     if rec is None:
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
     return rec

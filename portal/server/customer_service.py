@@ -13,12 +13,18 @@ def _top_reason(reasons: list) -> str | None:
     return r.get("feature") if isinstance(r, dict) else str(r)
 
 
-def customer_360(business_id, adj_pop, pricing_pop, ews_pop, li_pop) -> dict | None:
+def customer_360(business_id, adj_pop, pricing_pop, ews_pop, li_pop, profiles) -> dict | None:
     if business_id not in adj_pop.index:
         return None
     adj = service.record_to_detail(adj_pop.loc[business_id])
     booked = business_id in pricing_pop.index
-    profile = {"business_id": business_id, "industry": adj["industry"], "booked": bool(booked)}
+    profile = {
+        "business_id": business_id,
+        "industry": adj["industry"],
+        "booked": bool(booked),
+        "region": str(profiles.loc[business_id, "region"]) if business_id in profiles.index else None,
+        "annual_revenue": float(profiles.loc[business_id, "annual_revenue"]) if business_id in profiles.index else None,
+    }
     score = {"business_score": int(adj["business_score"]), "score_band": str(adj["score_band"])}
     adjudication = {"decision": adj["decision"], "pd": float(adj["pd"]),
                     "top_reason": _top_reason(adj.get("top_shap_reasons", []))}

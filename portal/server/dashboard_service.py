@@ -1,7 +1,6 @@
 """Cross-module KPI summary for the Dashboard. Pure aggregation over the cached
 populations in app.state — no model loads."""
 from __future__ import annotations
-import pandas as pd
 
 from portal.server.pricing_service import BASE_MARKET
 
