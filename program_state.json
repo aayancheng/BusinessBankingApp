@@ -2,7 +2,7 @@
   "program": "business-banking-app",
   "workspace": "/Users/aayan/zzLearnAndCreate/BusinessBankingApp",
   "created_at": "2026-06-14",
-  "updated_at": "2026-06-16",
+  "updated_at": "2026-06-17",
   "spec": "docs/superpowers/specs/2026-06-14-business-banking-app-design.md",
   "ports": { "fastapi": 8100, "express": 3100, "vite": 5180 },
   "decisions": {
@@ -13,11 +13,11 @@
     "venv": "self-contained",
     "roe_hurdle": 0.15
   },
-  "session_status": "PAUSED 2026-06-16 — Modules 0,1,2,3,4 ALL COMPLETE AND MERGED TO main. Merge commits: foundation+score fce144a; Adjudication f6d4918; Pricing 70b4461; EWS 86ca438; Module 4 Line Increase be14892. main is green: 97/97 backend pytest + 12/12 Playwright (3 adj + 3 pricing + 3 ews + 3 line-increase) + vite build ok. Working tree clean, on branch main. All 4 apps + shared score are done. The ONE remaining phase is portal_integration (cross-module Dashboard + /api/customer/{id} 360 view + exec deck + end-to-end Playwright). NOTE: Module 4 sharpened the synthetic line_increase_good target (Option A — pure-leaf, RNG-safe; businesses/panel + all other portfolio cols bit-identical, Modules 0-3 unaffected); shared/data_generator.py changed. Resume in a fresh session.",
+  "session_status": "AWAITING MERGE 2026-06-17 — portal_integration (the FINAL phase) is BUILT and green on branch build/portal-integration; awaiting user review before --no-ff merge to main. This completes the whole program: shared Score + 4 apps + integrated portal. Branch adds: cross-module Dashboard (GET /api/dashboard/summary), Customer 360 view (GET /api/customer/{id}, own nav entry, all 5 modules for one business, null sections for non-booked applicants), a self-contained HTML demo deck (docs/deck/index.html, 10 slides, plan->execute->verify story), and end-to-end Playwright with screenshot capture for a teaching video (docs/screenshots/e2e/, 15 PNGs). Gate: 101/101 backend pytest (97 prior + 4 new) + 14/14 Playwright (12 prior + 2 customer_360) + vite build ok; final holistic review = READY TO MERGE (no Module 0-4 regression). Modules 0-4 already merged to main (foundation+score fce144a; Adjudication f6d4918; Pricing 70b4461; EWS 86ca438; Line Increase be14892).",
   "resume_command": "Open the BusinessBankingApp workspace and say: 'resume the business banking build' (Claude reads program_state.json + the latest SESSION_LOG.md entry, prints the status board, and continues from next_action). To jump straight to the next module say: 'resume the business banking build — start Module 4 (Proactive Line Increase)'.",
-  "verify_main_command": "cd /Users/aayan/zzLearnAndCreate/BusinessBankingApp && ./.venv/bin/pytest -q   (expect 97 passed on build/line-increase; 80 on main until merged); UI e2e: (cd portal/client && npx playwright test) expect 12; manual UI: ./.venv/bin/uvicorn portal.server.main:app --port 8100  +  (cd portal/client && npm run dev) -> http://localhost:5180",
-  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing", "portfolio_ews", "line_increase"],
-  "next_action": "START the final phase — portal_integration (all 4 apps + score are merged to main). Build: (1) a cross-module Dashboard replacing the current placeholder (portfolio KPIs across Adjudication/Pricing/EWS/LineIncrease); (2) GET /api/customer/{id} — a 360 view aggregating Score + Adjudication decision + Pricing ROE + EWS risk + LineIncrease offer for one business, reusing the cached app.state populations in portal/server/main.py; (3) an executive deck/README; (4) end-to-end Playwright that walks one business across all 4 modules. Pattern (same as Modules 1-4): brainstorm -> sub-spec (docs/superpowers/specs/) -> plan (docs/superpowers/plans/) -> subagent-driven build on branch build/portal-integration, two-stage review per task, then stop for user review before --no-ff merge to main. Keep the per-task subagent token tally. CARRY-FORWARD: (a) Module 4 sharpened the line_increase_good DGP (Option A) in shared/data_generator.py — RNG-safe pure leaf; if data is ever regenerated it stays consistent. (b) EWS deterioration target remains noise-capped (oracle ~0.70); ews/docs/enhancement_notes.md Option A is still deferred. (c) main is green at 97 pytest + 12 e2e.",
+  "verify_main_command": "cd /Users/aayan/zzLearnAndCreate/BusinessBankingApp && ./.venv/bin/pytest -q   (expect 101 passed on build/portal-integration; 97 on main until merged); UI e2e: (cd portal/client && npx playwright test) expect 14; manual UI: ./.venv/bin/uvicorn portal.server.main:app --port 8100  +  (cd portal/client && npm run dev) -> http://localhost:5180 ; demo deck: open docs/deck/index.html (or serve docs/deck on a local http server)",
+  "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing", "portfolio_ews", "line_increase", "portal_integration"],
+  "next_action": "MERGE the final phase: review branch build/portal-integration, then `git checkout main && git merge --no-ff build/portal-integration`. After merge, verify on main (101 pytest + 14 e2e + vite build), then the PROGRAM IS COMPLETE — shared Score + 4 decision apps + integrated portal (Dashboard + Customer 360) + demo deck + teaching-video screenshots. Nothing else queued. Optional future enhancements remain deferred: (a) EWS deterioration target is noise-capped (oracle ~0.70); ews/docs/enhancement_notes.md Option A still deferred. (b) recharts/shap make the vite bundle ~622kB (informational warning only).",
   "phases": [
     {
       "id": "foundation",
@@ -213,14 +213,38 @@
     },
     {
       "id": "portal_integration",
-      "title": "Portal integration, 360 view, exec deck, end-to-end Playwright",
-      "status": "pending",
+      "title": "Portal integration, 360 view, demo deck, end-to-end Playwright",
+      "status": "completed",
       "tasks": [
-        { "id": "dashboard", "desc": "Cross-module Dashboard + /api/customer/{id} 360 view", "done": false },
-        { "id": "e2e",       "desc": "End-to-end Playwright across all 5 modules", "done": false },
-        { "id": "deck",      "desc": "Executive deck + README", "done": false }
+        { "id": "dashboard", "desc": "Cross-module Dashboard (GET /api/dashboard/summary) + Customer 360 (GET /api/customer/{id}) + nav entry", "done": true },
+        { "id": "e2e",       "desc": "End-to-end Playwright (customer_360.spec) + screenshot capture across all specs for teaching video", "done": true },
+        { "id": "deck",      "desc": "Self-contained HTML demo deck (docs/deck/index.html, 10 slides, plan->execute->verify)", "done": true }
       ],
-      "metrics": {}, "artifacts": [], "completed_at": null
+      "metrics": {
+        "backend_tests_total": 101, "new_backend_tests": 4,
+        "playwright_tests_total": 14, "new_playwright_tests": 2,
+        "vite_build": "ok",
+        "dashboard_kpis": { "n_applicants": 12000, "model_auc": 0.8096, "pct_clears_hurdle": 0.304, "n_high_risk": 833, "n_eligible_offers": 95 },
+        "customer_360": { "booked_modules": 5, "non_booked_modules": 2, "seed_id": "BIZ100000" },
+        "e2e_screenshots": 15, "deck_slides": 10
+      },
+      "artifacts": [
+        "docs/superpowers/specs/2026-06-16-portal-integration-design.md",
+        "docs/superpowers/plans/2026-06-16-portal-integration.md",
+        "portal/server/customer_service.py",
+        "portal/server/dashboard_service.py",
+        "portal/server/schemas.py (DashboardSummary, Customer360 + nested optional blocks)",
+        "portal/server/main.py (+2 routes: /api/dashboard/summary, /api/customer/{id}; lifespan caches app.state.profiles)",
+        "portal/server/tests/{test_dashboard_api,test_customer_api}.py",
+        "portal/client/src/views/Dashboard.jsx (cross-module rewrite)",
+        "portal/client/src/views/Customer360View.jsx",
+        "portal/client/src/components/Sidebar.jsx + App.jsx (Customer 360 nav entry) + lib/{api,hooks}.js",
+        "docs/deck/index.html",
+        "portal/client/e2e/_shot.js + customer_360.spec.js (+ shot() wired into adj/pricing/ews/line_increase specs)",
+        "docs/screenshots/e2e/ (15 PNGs across 5 modules) + docs/screenshots/deck/ (deck shots)"
+      ],
+      "completed_at": "2026-06-17",
+      "review": "Subagent-driven, 6 tasks, branch build/portal-integration. T1 (backend services/routes) needed a fix dispatch (spec called for region/annual_revenue in the 360 profile; score_population strips them, so lifespan now caches a small profiles frame from businesses.parquet via shared.config.RAW). T2 tests + T6 e2e controller-verified by the full gate. T3+T4 frontend reviewed together; T5 deck visually verified by controller via Playwright. Final holistic review = READY TO MERGE: 101 backend pytest + 14 Playwright + vite build, zero Module 0-4 regression, clean hygiene. Customer 360 handles the booked-subset edge case (non-booked applicants -> null pricing/ews/line_increase, modules_present=[score,adjudication]). AWAITING user review before --no-ff merge to main."
     }
   ]
 }

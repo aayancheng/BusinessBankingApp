@@ -456,3 +456,78 @@ line-increase), **vite build ok**. (Also added a missing `line_increase/tests` t
 portal_integration (cross-module Dashboard + 360 view + exec deck).
 
 **Resume:** open `BusinessBankingApp` and say "resume the business banking build".
+
+---
+
+## Session 7 — 2026-06-17 — Portal integration (FINAL phase): Dashboard + Customer 360 + demo deck + e2e screenshots
+
+**Scope (user-confirmed):** the final integration phase. Customer 360 as its own nav entry;
+an HTML/CSS/JS demo deck showcasing the full plan→execute→verify cycle with Claude; same
+subagent-driven cadence with two-stage review. User also asked to **save Playwright
+screenshots for a later teaching video.** Branch `build/portal-integration`. Modules 0–4
+already merged to main (97 pytest + 12 e2e).
+
+**Built (6 tasks):**
+- **Backend** — `dashboard_service.py` (cross-module KPI summary) + `customer_service.py`
+  (360 aggregation), pure over the 4 cached `app.state` populations (no model loads). Two
+  routes: `GET /api/dashboard/summary`, `GET /api/customer/{id}`. The 360 envelope handles the
+  **booked-subset edge case**: applicants (12k) vs booked accounts (8,336) — a non-booked
+  business returns null Pricing/EWS/LineIncrease and `modules_present=[score,adjudication]`;
+  a booked one (seed `BIZ100000`) lights up all 5. Lifespan now also caches a small
+  `app.state.profiles` frame (region/annual_revenue from `businesses.parquet` via
+  `shared.config.RAW`).
+- **Frontend** — Dashboard rewritten to a 6-tile cross-module KPI strip + "five modules, one
+  credit spine" card; new `Customer360View` (seeded BIZ100000, 5 stacked module cards reusing
+  DecisionBadge/PassFailBadge/RiskTierBadge, muted "not on book" state for non-booked); a
+  top-level **Customer 360** nav entry; api/hooks wiring.
+- **Deck** — `docs/deck/index.html`, self-contained (inline CSS+JS, no CDN), 10 slides, arrow/
+  space/Home-End nav; slide 8 (brainstorm→spec→plan→subagents→review×2→merge pipeline + the
+  two-BLOCK governance callout) and slide 9 (verification) are the teaching climax.
+- **e2e + screenshots** — `customer_360.spec.js` (Dashboard KPIs + all-5-modules render) +
+  `_shot.js` helper wired into ALL specs; **15 PNGs** committed under `docs/screenshots/e2e/`
+  (5 modules) for the teaching video; deck shots in `docs/screenshots/deck/`.
+
+**Gate (all green):** **101/101 backend pytest** (97 prior + 4 new), **14/14 Playwright**
+(12 prior + 2 customer_360), **vite build ok**. Final holistic branch review =
+**READY TO MERGE**, zero Module 0–4 regression, clean hygiene (no debug code, no stray
+artifacts, MarketingAnalytics untouched). Controller visually verified the deck (slides 1 + 8)
+and the Customer 360 booked-full render via Playwright.
+
+**Subagent token tally (Session 7) — actual `subagent_tokens`:**
+
+| Task | Role | Model | Tokens | Outcome |
+|------|------|-------|-------:|---------|
+| T1 services + schemas + routes | impl | sonnet | 38,736 | DONE |
+| T1 | review (combined spec+quality) | sonnet | 46,561 | APPROVED + flagged missing region/revenue |
+| T1 fix (region/annual_revenue + dead import) | impl | sonnet | 33,253 | DONE |
+| T2 backend API tests | impl | haiku | 34,130 | DONE; controller-verified (101 passed) |
+| T3 cross-module Dashboard + wiring | impl | sonnet | 29,807 | DONE |
+| T4 Customer 360 view + nav | impl | sonnet | 31,178 | DONE |
+| T3+T4 | review (combined frontend) | sonnet | 37,706 | APPROVED (all testids/props/wrappers) |
+| T5 HTML demo deck | impl | sonnet | 29,087 | DONE; controller visually verified |
+| T6 e2e + screenshots across all specs | impl | sonnet | 33,496 | DONE (14/14, 15 PNGs); controller-verified |
+| Final holistic branch review | review | sonnet | 51,745 | READY TO MERGE |
+
+- **Session 7 total: 365,699 tokens / 10 dispatches** (impl 229,687 + review 136,012).
+- By model: sonnet 331,569 (9), haiku 34,130 (1).
+- **Zero BLOCKs** — a pure integration phase over already-built, already-reviewed modules. The
+  one substantive review catch was T1's missing `region`/`annual_revenue` profile fields (spec
+  vs. implementation gap, caught by the combined review and fixed in a follow-up dispatch
+  before it could cascade into the T4 frontend). Test/e2e tasks (T2, T6) were controller-
+  verified by the full gate rather than a separate review dispatch, and T3+T4 shared one
+  frontend review — the same cost-saving pattern proven in Modules 3–4.
+- **Program cumulative: ~3,156,869 tokens** across 7 build sessions, ~80 subagent dispatches.
+- **Design takeaways:** (a) the highest-value review catch was a spec/impl gap (profile fields),
+  not a bug — combined spec+quality review still earns its keep on "transcription" tasks; (b)
+  controller-side visual verification (Playwright screenshot of the deck + 360 view) is the
+  right gate for static/visual artifacts where a text-only review subagent adds little; (c) the
+  booked-vs-applicant subset was the one real design subtlety and was front-loaded into the spec,
+  so no implementer had to rediscover it.
+
+**Status:** **PROGRAM BUILD COMPLETE** — shared Business Credit Score + 4 decision apps +
+integrated portal (Dashboard + Customer 360) + demo deck + teaching-video screenshots. The
+final phase is built and green. **Awaiting user review before `--no-ff` merge to `main`.**
+Branch `build/portal-integration`. After merge, nothing else is queued.
+
+**Resume:** open `BusinessBankingApp` and say "resume the business banking build" (it will
+offer the final merge), or review the branch and merge directly.
