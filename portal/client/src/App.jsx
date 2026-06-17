@@ -13,12 +13,13 @@ import EwsSegmentsView from './views/ews/EwsSegmentsView';
 import LineIncreaseLookupView from './views/line_increase/LineIncreaseLookupView';
 import LineIncreaseCandidatesView from './views/line_increase/LineIncreaseCandidatesView';
 import LineIncreaseSegmentsView from './views/line_increase/LineIncreaseSegmentsView';
+import Customer360View from './views/Customer360View';
 import {
   useApplication, useDecide, useSegments,
   usePricing, usePricingPortfolio, usePricingQuote,
   useEws, useEwsWatchlist, useEwsSegments,
   useLineIncrease, useCandidates, useLineIncreaseSegments,
-  useDashboardSummary,
+  useDashboardSummary, useCustomer360,
 } from './lib/hooks';
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
   const lineIncrease = useLineIncrease();
   const candidatesHook = useCandidates();
   const liSeg = useLineIncreaseSegments();
+  const customer360 = useCustomer360();
 
   const onNavigate = (module, view) => setNav({ module, view });
   const is = (m, v) => nav.module === m && nav.view === v;
@@ -45,6 +47,7 @@ export default function App() {
       <Sidebar module={nav.module} view={nav.view} onNavigate={onNavigate} />
       <main className="flex-1 md:ml-56 p-6 md:p-8 max-w-5xl">
         {nav.module === 'dashboard' && <Dashboard hook={dashboard} />}
+        {nav.module === 'customer360' && <Customer360View hook={customer360} />}
         {is('adjudication', 'lookup') && <LookupView hook={application} />}
         {is('adjudication', 'whatif') && <WhatIfView hook={decideHook} />}
         {is('adjudication', 'segments') && <SegmentsView hook={segments} />}
