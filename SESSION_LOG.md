@@ -632,3 +632,124 @@ Note: `~/.claude` is not a git repo, so the skills are not version-controlled (s
 **Subagent token tally (Session 9):** 4 dispatches / ~75,164 tokens — RED baselines: synthetic
 17,687 + platform 19,241; GREEN verifies: synthetic 18,019 + platform 20,217. (Authoring done by
 the controller inline.)
+
+---
+
+## Day 4 recap — 2026-06-17 (Sessions 7–10)
+
+Everything built on 2026-06-17 across four sessions. The app was already feature-complete at the
+start of the day (Modules 0–4 merged to `main`); Day 4 was the integration + refinement +
+meta-abstraction + brand-design layer.
+
+### Session 7 — Portal integration (final build phase)
+
+The last open build item: a cross-module entry point that unified all four decision apps under
+one roof. Built in a single subagent session on branch `build/portal-integration`.
+
+**Cross-module Dashboard** (`GET /api/dashboard/summary`): six KPI tiles spanning all five modules
+— Applicants Scored, Model AUC, Clears ROE Hurdle, High-Risk Accounts, Line-Increase Offers,
+Status. Replaced the placeholder health-check page that shipped with the portal.
+
+**Customer 360** (`GET /api/customer/{id}`): a dedicated nav entry (between Dashboard and the
+module group) that aggregates all five modules for a single business in one API call. Handles the
+booked-subset edge case cleanly — a non-booked applicant gets null Pricing/EWS/Line-Increase
+blocks and `modules_present: [score, adjudication]`; the "NotBooked" component renders inside a
+stable wrapper div so Playwright testids stay valid. Lifespan caches `app.state.profiles`
+(region/annual_revenue from `businesses.parquet`) so the 360 card shows business profile data
+without re-scanning the population.
+
+**HTML demo deck** (`docs/deck/index.html`): a fully self-contained 10-slide presentation with
+inline CSS/JS, no CDN dependencies. Arrow / Space / Home / End navigation. The teaching climax
+is slide 8 — the brainstorm→spec→plan→subagents→review²→merge pipeline rendered as a visual
+flow, with the two BLOCK escalations (EWS, Line Increase) called out as the governance headline.
+Slide 9 covers live verification (gate results, Playwright screenshot strip).
+
+**E2e + teaching-video screenshots**: `_shot.js` helper wired into all five spec files; 15 PNGs
+committed under `docs/screenshots/e2e/` (one folder per module). Two `customer_360.spec.js`
+tests: Dashboard KPIs visible, all five module cards render for a seeded on-book entity.
+
+Gate: **101/101 pytest · 14/14 Playwright · vite build ok**. Merged to `main` (commit `81b6121`).
+
+Notable review catch: the T1 combined spec+quality reviewer caught that `region` and
+`annual_revenue` were required in `Customer360Profile` per spec but missing from the
+implementation — the fix ran as a follow-up dispatch before the frontend task could inherit
+the wrong shape.
+
+### Session 8 — Lookup dropdowns with hints
+
+User feedback while testing the live app: blank ID boxes are unfriendly. Built inline (no
+subagents), branch `feat/lookup-dropdowns`.
+
+**`GET /api/examples`** (`examples_service.py`): returns 12 diverse `{id, hint}` options per
+module surface using round-robin sampling across key decision categories (Approve/Refer/Decline,
+clears/below hurdle, High/Med/Low risk, eligible/not, on-book/applicant). Hints are readable
+strings like "Retail · Approve" or "Hospitality · High risk".
+
+**`EntitySelect.jsx`**: a `<select>` dropdown with Search icon + ChevronDown, keeping the
+existing testids (`applicant-input`, `applicant-lookup`) so Playwright specs only needed
+`.fill(id)` → `.selectOption({ index: 1 })`, not selector changes. Auto-looks-up on selection
+change. A module-level one-shot cache (`_examplesCache`/`_examplesPromise`) in `hooks.js`
+ensures one fetch across all views regardless of navigation order.
+
+Customer 360 seeds its first **on-book** example automatically so all five module cards light up
+on open. The four module lookups each seed their first example in their respective category.
+
+Gate: **104/104 pytest · 14/14 Playwright · vite build ok**. Merged to `main` (`db9fb0e`).
+
+### Session 9 — Decisioning platform skill
+
+Extracted the build method from this app into two reusable personal Claude Code skills,
+deployable to any business-analytics domain (insurance, SaaS/CRM, supply chain, healthcare,
+fraud — not just credit).
+
+The skills were authored with TDD-for-skills (`superpowers:writing-skills`): RED baselines
+exposed the precise gaps — the synthetic-data baseline gated from business intuition without
+measuring the achievable ceiling; the platform baseline missed the manifest, named archetypes,
+and governance depth. Both gaps were directly addressed in the skill content, then GREEN-verified.
+
+**`synthetic-entity-data`** (deployed at `~/.claude/skills/`): the oracle-ceiling-before-gate
+rule; leakage deny-list; the pure-leaf vs. consumed-target choice for noise-capped labels.
+
+**`decisioning-platform`** (deployed at `~/.claude/skills/`): the slot model
+(entity → score-spine → N decision apps → unified portal); platform manifest format; the four
+decision-app archetypes (Eligibility/Triage, Economics, Monitoring, Next-Best-Action); delegation
+to existing `superpowers` skills; the five governance gates (leakage-safe, honest-gate,
+BLOCK-escalate, back-compat-re-run, stop-before-merge).
+
+Reference files: `references/decision-app-archetypes.md` (detailed recipes per archetype + domain
+mapping table) + `references/reference-implementation-map.md` (pattern → BusinessBankingApp file).
+
+Copies committed to `skills/` in this repo for version control and GitHub sharing. Golden source:
+`~/.claude/skills/`. Token spend: 4 dispatches / ~75,164 subagent tokens.
+
+### Session 10 (current) — Brand kit design
+
+Pivoted to front-end visual identity. The existing UI is functional but stock Tailwind — no custom
+theme, no brand personality, colors hardcoded as utility strings throughout components.
+
+**Design direction chosen: C (Approachable Advisor) as base, B (Modern Analytics) touches.**
+
+The brand voice drove the palette: dark teal expresses trusted expertise; amber conveys warmth and
+decisiveness; cream softens the analytical environment. The B-direction overlay adds crispness for
+data-dense surfaces — Space Grotesk for large metric numbers, sharper radii on charts and tables,
+an indigo-family interactive accent that separates clickable elements from informational ones.
+
+Full token system, typography scale, spacing/radius/motion values, Tailwind `theme.extend`
+structure, and component-level implementation notes are in the brand-kit spec:
+`docs/superpowers/specs/2026-06-17-brand-kit-design.md`.
+
+**Implementation is deferred** — spec only; user will apply the theme in a separate session.
+
+---
+
+## Session 10 — 2026-06-17 — Brand kit design spec
+
+**Scope:** author the brand-kit design spec for a frontend redesign. No code written.
+The existing portal is functional but uses stock Tailwind with no custom theme. Spec covers the
+full token system (color, type, spacing, motion) and component-level notes so the next session
+can implement turnkey.
+
+**Output:** `docs/superpowers/specs/2026-06-17-brand-kit-design.md` — see that file for the
+complete spec. Committed to `main`.
+
+**Status:** spec written. Implementation queued for next session.
