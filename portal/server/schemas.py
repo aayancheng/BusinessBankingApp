@@ -265,3 +265,61 @@ class LineIncreaseSegmentRow(BaseModel):
 class LineIncreaseSegments(BaseModel):
     by_band: list[LineIncreaseSegmentRow]
     by_industry: list[LineIncreaseSegmentRow]
+
+
+# --- Dashboard + Customer 360 (Portal Integration) ---
+class DashboardSummary(BaseModel):
+    model_config = {"protected_namespaces": ()}
+    n_applicants: int
+    model_auc: float
+    pct_clears_hurdle: float
+    n_high_risk: int
+    n_eligible_offers: int
+    status: str
+
+
+class Customer360Profile(BaseModel):
+    business_id: str
+    industry: str
+    booked: bool
+    region: Optional[str] = None
+    annual_revenue: Optional[float] = None
+
+
+class Customer360Score(BaseModel):
+    business_score: int
+    score_band: str
+
+
+class Customer360Adjudication(BaseModel):
+    decision: str
+    pd: float
+    top_reason: Optional[str] = None
+
+
+class Customer360Pricing(BaseModel):
+    quoted_rate: float
+    roe: float
+    clears_hurdle: bool
+
+
+class Customer360Ews(BaseModel):
+    risk_tier: str
+    deterioration_prob: float
+    n_triggers: int
+
+
+class Customer360LineIncrease(BaseModel):
+    eligible: bool
+    recommended_amount: float
+    incremental_roe: float
+
+
+class Customer360(BaseModel):
+    profile: Customer360Profile
+    score: Customer360Score
+    adjudication: Customer360Adjudication
+    pricing: Optional[Customer360Pricing] = None
+    ews: Optional[Customer360Ews] = None
+    line_increase: Optional[Customer360LineIncrease] = None
+    modules_present: list[str]

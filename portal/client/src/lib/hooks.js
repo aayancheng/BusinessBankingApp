@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments, fetchLineIncrease, fetchCandidates, lineIncreaseSimulate, fetchLineIncreaseSegments } from './api';
+import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments, fetchLineIncrease, fetchCandidates, lineIncreaseSimulate, fetchLineIncreaseSegments, fetchDashboardSummary, fetchCustomer360 } from './api';
 
 function asError(e) {
   return e.response?.data?.detail || { error: 'unknown', message: 'Request failed' };
@@ -162,4 +162,26 @@ export function useLineIncreaseSegments() {
     try { setData(await fetchLineIncreaseSegments()); } finally { setLoading(false); }
   }, []);
   return { data, loading, load };
+}
+
+export function useDashboardSummary() {
+  const [data, setData] = useState(null);
+  const load = useCallback(async () => {
+    try { setData(await fetchDashboardSummary()); } catch { /* noop */ }
+  }, []);
+  return { data, load };
+}
+
+export function useCustomer360() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const lookup = useCallback(async (id) => {
+    if (!id) return;
+    setLoading(true); setError(null);
+    try { setData(await fetchCustomer360(id)); }
+    catch (e) { setData(null); setError(e.response?.data?.detail || { message: 'Request failed' }); }
+    finally { setLoading(false); }
+  }, []);
+  return { data, error, loading, lookup };
 }

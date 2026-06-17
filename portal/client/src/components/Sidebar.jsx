@@ -1,4 +1,4 @@
-import { LayoutDashboard, Search, SlidersHorizontal, PieChart, Star, AlertTriangle, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Layers, Search, SlidersHorizontal, PieChart, Star, AlertTriangle, TrendingUp } from 'lucide-react';
 
 const ADJUDICATION_ITEMS = [
   { module: 'adjudication', view: 'lookup',   testid: 'nav-lookup',   label: 'Lookup',   icon: Search },
@@ -77,6 +77,15 @@ export default function Sidebar({ module, view, onNavigate }) {
         >
           <LayoutDashboard size={17} />
           Dashboard
+        </button>
+
+        <button
+          data-testid="nav-customer360"
+          onClick={() => onNavigate?.('customer360', 'customer360')}
+          className={itemClass(module === 'customer360')}
+        >
+          <Layers size={17} />
+          Customer 360
         </button>
 
         <GroupHeader>Adjudication</GroupHeader>
