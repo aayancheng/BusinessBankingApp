@@ -14,10 +14,11 @@ import LineIncreaseLookupView from './views/line_increase/LineIncreaseLookupView
 import LineIncreaseCandidatesView from './views/line_increase/LineIncreaseCandidatesView';
 import LineIncreaseSegmentsView from './views/line_increase/LineIncreaseSegmentsView';
 import {
-  useApplication, useDecide, useSegments, useHealth,
+  useApplication, useDecide, useSegments,
   usePricing, usePricingPortfolio, usePricingQuote,
   useEws, useEwsWatchlist, useEwsSegments,
   useLineIncrease, useCandidates, useLineIncreaseSegments,
+  useDashboardSummary,
 } from './lib/hooks';
 
 export default function App() {
@@ -25,7 +26,7 @@ export default function App() {
   const application = useApplication();
   const decideHook = useDecide();
   const segments = useSegments();
-  const health = useHealth();
+  const dashboard = useDashboardSummary();
   const pricing = usePricing();
   const pricingPortfolio = usePricingPortfolio();
   const pricingQuoteHook = usePricingQuote();
@@ -43,7 +44,7 @@ export default function App() {
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar module={nav.module} view={nav.view} onNavigate={onNavigate} />
       <main className="flex-1 md:ml-56 p-6 md:p-8 max-w-5xl">
-        {nav.module === 'dashboard' && <Dashboard hook={health} />}
+        {nav.module === 'dashboard' && <Dashboard hook={dashboard} />}
         {is('adjudication', 'lookup') && <LookupView hook={application} />}
         {is('adjudication', 'whatif') && <WhatIfView hook={decideHook} />}
         {is('adjudication', 'segments') && <SegmentsView hook={segments} />}

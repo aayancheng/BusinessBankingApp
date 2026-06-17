@@ -50,3 +50,9 @@ export async function lineIncreaseSimulate(payload) {
 export async function fetchLineIncreaseSegments() {
   return (await api.get('/api/line-increase/segments')).data;
 }
+export async function fetchDashboardSummary() {
+  return (await api.get('/api/dashboard/summary')).data;
+}
+export async function fetchCustomer360(id) {
+  return (await api.get(`/api/customer/${id}`)).data;
+}
