@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../../components/Card';
 import StatCard from '../../components/StatCard';
-import ApplicantSelect from '../../components/ApplicantSelect';
+import EntitySelect from '../../components/EntitySelect';
 import PassFailBadge from '../../components/PassFailBadge';
 import Waterfall from '../../components/Waterfall';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorBanner from '../../components/ErrorBanner';
+import { useExamples } from '../../lib/hooks';
 
 const pct = (x) => `${(x * 100).toFixed(1)}%`;
 
@@ -24,18 +25,27 @@ function waterfallRows(wf) {
 export default function PricingLookupView({ hook }) {
   const { data, error, loading, lookup } = hook;
   const [id, setId] = useState('');
+  const examples = useExamples();
+  const options = examples?.pricing || [];
+
+  useEffect(() => {
+    if (!id && options.length > 0) {
+      setId(options[0].id);
+      lookup(options[0].id);
+    }
+  }, [options]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-testid="view-pricing-lookup" className="space-y-5">
       <div>
         <h2 className="text-2xl font-bold text-slate-800 mb-1">Pricing Lookup</h2>
         <p className="text-sm text-slate-500">
-          Enter a business ID to view its risk-adjusted pricing and profitability.
+          Pick a business to view its risk-adjusted pricing and profitability.
         </p>
       </div>
 
       <Card>
-        <ApplicantSelect value={id} onChange={setId} onLookup={() => lookup(id)} />
+        <EntitySelect value={id} options={options} onChange={setId} onLookup={lookup} />
       </Card>
 
       <ErrorBanner error={error} />

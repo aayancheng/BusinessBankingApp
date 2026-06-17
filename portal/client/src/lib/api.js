@@ -56,3 +56,6 @@ export async function fetchDashboardSummary() {
 export async function fetchCustomer360(id) {
   return (await api.get(`/api/customer/${id}`)).data;
 }
+export async function fetchExamples() {
+  return (await api.get('/api/examples')).data;
+}

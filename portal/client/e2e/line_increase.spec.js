@@ -6,8 +6,7 @@ test('line-increase lookup shows eligibility + incremental ROE', async ({ page }
   const id = (await r.json()).items[0].business_id;
   await page.goto('/');
   await page.getByTestId('nav-li-lookup').click();
-  await page.getByTestId('applicant-input').fill(id);
-  await page.getByTestId('applicant-lookup').click();
+  await page.getByTestId('applicant-input').selectOption({ index: 1 });
   await expect(page.getByTestId('roe-badge').first()).toBeVisible();
   await expect(page.getByTestId('pricing-waterfall')).toBeVisible();
   await shot(page, 'line_increase', '01-lookup-eligibility');

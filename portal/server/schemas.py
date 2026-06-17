@@ -323,3 +323,16 @@ class Customer360(BaseModel):
     ews: Optional[Customer360Ews] = None
     line_increase: Optional[Customer360LineIncrease] = None
     modules_present: list[str]
+
+
+class ExampleOption(BaseModel):
+    id: str
+    hint: str
+
+
+class ExamplesResponse(BaseModel):
+    adjudication: list[ExampleOption]
+    pricing: list[ExampleOption]
+    ews: list[ExampleOption]
+    line_increase: list[ExampleOption]
+    customer360: list[ExampleOption]

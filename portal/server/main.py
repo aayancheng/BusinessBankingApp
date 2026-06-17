@@ -18,7 +18,7 @@ from portal.server import service
 from portal.server import pricing_service
 from portal.server import ews_service
 from portal.server import line_increase_service
-from portal.server import customer_service, dashboard_service
+from portal.server import customer_service, dashboard_service, examples_service
 from portal.server.schemas import (
     AdjudicationDetail, DecideRequest, HealthResponse,
     PaginatedApplications, SegmentsResponse,
@@ -26,7 +26,7 @@ from portal.server.schemas import (
     EwsDetail, WatchlistItem, EwsSegments,
     LineIncreaseDetail, PaginatedCandidates, SimulateRequest, SimulateResponse,
     LineIncreaseSegments,
-    DashboardSummary, Customer360,
+    DashboardSummary, Customer360, ExamplesResponse,
 )
 
 
@@ -161,6 +161,12 @@ def line_increase_detail(business_id: str):
     if rec is None:
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": business_id})
     return rec
+
+
+@app.get("/api/examples", response_model=ExamplesResponse)
+def examples_route():
+    return examples_service.examples(
+        app.state.pop, app.state.pricing_pop, app.state.ews_pop, app.state.li_pop)
 
 
 @app.get("/api/dashboard/summary", response_model=DashboardSummary)
