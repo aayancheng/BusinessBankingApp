@@ -559,4 +559,11 @@ UI change), branch `feat/lookup-dropdowns`.
 
 **Gate:** **104/104 backend pytest** (101 + 3 new), **14/14 Playwright**, vite build ok.
 Controller visually verified the adjudication + Customer 360 dropdowns live (shots in
-`docs/screenshots/dropdowns/`). Branch `feat/lookup-dropdowns` — awaiting user review/merge.
+`docs/screenshots/dropdowns/`). **Merged to `main` (`db9fb0e`); main green at 104 pytest + 14
+e2e.**
+
+**Status:** **PROGRAM COMPLETE — all phases + enhancements merged to `main`.** Also added
+project docs for handoff: refreshed `CLAUDE.md` (build-complete + run instructions),
+`program_state.json` (status COMPLETE), and a GitHub `README.md` at repo root. Working tree
+clean. To run: `./.venv/bin/uvicorn portal.server.main:app --port 8100` + `(cd portal/client
+&& npm run dev)` → http://localhost:5180.
