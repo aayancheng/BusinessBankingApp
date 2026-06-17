@@ -1,30 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../../components/Card';
 import StatCard from '../../components/StatCard';
-import ApplicantSelect from '../../components/ApplicantSelect';
+import EntitySelect from '../../components/EntitySelect';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorBanner from '../../components/ErrorBanner';
 import ReasonList from '../../components/ReasonList';
 import RiskTierBadge from '../../components/RiskTierBadge';
 import RiskTrajectory from '../../components/RiskTrajectory';
+import { useExamples } from '../../lib/hooks';
 
 const pct = (x) => `${(x * 100).toFixed(1)}%`;
 
 export default function EwsLookupView({ hook }) {
   const { data, error, loading, lookup } = hook;
   const [id, setId] = useState('');
+  const examples = useExamples();
+  const options = examples?.ews || [];
+
+  useEffect(() => {
+    if (!id && options.length > 0) {
+      setId(options[0].id);
+      lookup(options[0].id);
+    }
+  }, [options]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-testid="view-ews-lookup" className="space-y-5">
       <div>
         <h2 className="text-2xl font-bold text-slate-800 mb-1">Early-Warning Lookup</h2>
         <p className="text-sm text-slate-500">
-          Enter a business ID to view its deterioration risk, active triggers and trajectory.
+          Pick a business to view its deterioration risk, active triggers and trajectory.
         </p>
       </div>
 
       <Card>
-        <ApplicantSelect value={id} onChange={setId} onLookup={() => lookup(id)} />
+        <EntitySelect value={id} options={options} onChange={setId} onLookup={lookup} />
       </Card>
 
       <ErrorBanner error={error} />

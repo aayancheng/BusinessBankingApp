@@ -1,5 +1,9 @@
-import { useCallback, useState } from 'react';
-import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments, fetchLineIncrease, fetchCandidates, lineIncreaseSimulate, fetchLineIncreaseSegments, fetchDashboardSummary, fetchCustomer360 } from './api';
+import { useCallback, useEffect, useState } from 'react';
+import { fetchApplication, fetchApplications, decide, fetchSegments, fetchHealth, fetchPricing, fetchPricingPortfolio, pricingQuote, fetchEws, fetchEwsWatchlist, fetchEwsSegments, fetchLineIncrease, fetchCandidates, lineIncreaseSimulate, fetchLineIncreaseSegments, fetchDashboardSummary, fetchCustomer360, fetchExamples } from './api';
+
+// Shared one-shot cache so every lookup view fetches /api/examples just once.
+let _examplesCache = null;
+let _examplesPromise = null;
 
 function asError(e) {
   return e.response?.data?.detail || { error: 'unknown', message: 'Request failed' };
@@ -184,4 +188,18 @@ export function useCustomer360() {
     finally { setLoading(false); }
   }, []);
   return { data, error, loading, lookup };
+}
+
+// Returns the full examples object {adjudication, pricing, ews, line_increase, customer360},
+// each a list of {id, hint}. Fetched once and shared across all lookup views.
+export function useExamples() {
+  const [data, setData] = useState(_examplesCache);
+  useEffect(() => {
+    if (_examplesCache) { setData(_examplesCache); return; }
+    if (!_examplesPromise) _examplesPromise = fetchExamples();
+    _examplesPromise
+      .then((d) => { _examplesCache = d; setData(d); })
+      .catch(() => { _examplesPromise = null; });
+  }, []);
+  return data;
 }

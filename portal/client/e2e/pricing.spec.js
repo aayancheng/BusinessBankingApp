@@ -16,8 +16,7 @@ test('pricing lookup shows ROE pass/fail badge', async ({ page }) => {
   const id = await aBookedId(page);
   await page.goto('/');
   await page.getByTestId('nav-pricing-lookup').click();
-  await page.getByTestId('applicant-input').fill(id);
-  await page.getByTestId('applicant-lookup').click();
+  await page.getByTestId('applicant-input').selectOption({ index: 1 });
   await expect(page.getByTestId('roe-badge')).toBeVisible();
   await shot(page, 'pricing', '01-lookup-roe-badge');
 });

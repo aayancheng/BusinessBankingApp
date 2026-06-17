@@ -531,3 +531,32 @@ Branch `build/portal-integration`. After merge, nothing else is queued.
 
 **Resume:** open `BusinessBankingApp` and say "resume the business banking build" (it will
 offer the final merge), or review the branch and merge directly.
+
+---
+
+## Session 8 — 2026-06-17 — UX: lookup dropdowns with hints (post-build enhancement)
+
+**Trigger:** while testing the merged app live, the user asked for the lookup boxes to be a
+**pulldown with hints** instead of a blank ID field. Controller-built inline (small, cohesive
+UI change), branch `feat/lookup-dropdowns`.
+
+**Built:**
+- **Backend** — `portal/server/examples_service.py` + `GET /api/examples` (schema
+  `ExamplesResponse`). Pure over the cached pops: returns 12 diverse `{id, hint}` options per
+  surface (adjudication/pricing/ews/line_increase/customer360), round-robined across each
+  module's key category so the sample spans Approve/Refer/Decline, clears/below hurdle,
+  Low/Med/High risk, eligible/not, on-book/applicant. Hints read e.g. "Retail · Approve",
+  "Hospitality · High risk". `portal/server/tests/test_examples_api.py` (3 tests: shape,
+  diversity, ids resolve in-module).
+- **Frontend** — new `EntitySelect.jsx` dropdown (search icon + chevron, `<select>` keeping
+  testids `applicant-input`/`applicant-lookup`; selecting an option auto-looks-it-up). New
+  `useExamples()` hook with a shared one-shot cache (one `/api/examples` fetch across all
+  views). Wired into all four module lookups + Customer 360; each auto-seeds its first example
+  (Customer 360 seeds the first **on-book** example so all five modules light up). Removed the
+  now-dead `ApplicantSelect.jsx` and the adjudication example-pills.
+- **e2e** — the four module specs now `selectOption({ index: 1 })` instead of `.fill()`;
+  screenshots regenerated to show the dropdowns.
+
+**Gate:** **104/104 backend pytest** (101 + 3 new), **14/14 Playwright**, vite build ok.
+Controller visually verified the adjudication + Customer 360 dropdowns live (shots in
+`docs/screenshots/dropdowns/`). Branch `feat/lookup-dropdowns` — awaiting user review/merge.

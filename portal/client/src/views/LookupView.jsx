@@ -1,64 +1,38 @@
 import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import StatCard from '../components/StatCard';
-import ApplicantSelect from '../components/ApplicantSelect';
+import EntitySelect from '../components/EntitySelect';
 import DecisionBadge from '../components/DecisionBadge';
 import ReasonList from '../components/ReasonList';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
-import { fetchApplications } from '../lib/api';
+import { useExamples } from '../lib/hooks';
 
 export default function LookupView({ hook }) {
   const { data, error, loading, lookup } = hook;
   const [id, setId] = useState('');
-  const [exampleIds, setExampleIds] = useState([]);
+  const examples = useExamples();
+  const options = examples?.adjudication || [];
 
-  // On mount, load a few example IDs so the view isn't empty
+  // Auto-seed the first example once options load so the view isn't empty.
   useEffect(() => {
-    fetchApplications(1, 3)
-      .then((res) => {
-        const ids = (res.items || []).map((i) => i.business_id);
-        setExampleIds(ids);
-        // Auto-seed the first ID and look it up
-        if (ids.length > 0) {
-          setId(ids[0]);
-          lookup(ids[0]);
-        }
-      })
-      .catch(() => {
-        // non-fatal: just leave the view empty
-      });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  function handleLookup() {
-    lookup(id);
-  }
+    if (!id && options.length > 0) {
+      setId(options[0].id);
+      lookup(options[0].id);
+    }
+  }, [options]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-testid="view-lookup" className="space-y-5">
       <div>
         <h2 className="text-2xl font-bold text-slate-800 mb-1">Applicant Lookup</h2>
         <p className="text-sm text-slate-500">
-          Enter a business ID to view the adjudication decision and risk profile.
+          Pick a business to view the adjudication decision and risk profile.
         </p>
       </div>
 
       <Card>
-        <ApplicantSelect value={id} onChange={setId} onLookup={handleLookup} />
-        {exampleIds.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="text-xs text-slate-400 self-center">Examples:</span>
-            {exampleIds.map((eid) => (
-              <button
-                key={eid}
-                onClick={() => { setId(eid); lookup(eid); }}
-                className="text-xs px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
-              >
-                {eid}
-              </button>
-            ))}
-          </div>
-        )}
+        <EntitySelect value={id} options={options} onChange={setId} onLookup={lookup} />
       </Card>
 
       <ErrorBanner error={error} />

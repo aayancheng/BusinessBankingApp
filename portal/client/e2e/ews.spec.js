@@ -6,8 +6,7 @@ test('ews lookup shows risk tier + trajectory', async ({ page }) => {
   const id = (await r.json())[0].business_id;
   await page.goto('/');
   await page.getByTestId('nav-ews-lookup').click();
-  await page.getByTestId('applicant-input').fill(id);
-  await page.getByTestId('applicant-lookup').click();
+  await page.getByTestId('applicant-input').selectOption({ index: 1 });
   await expect(page.getByTestId('risk-tier-badge')).toBeVisible();
   await expect(page.getByTestId('ews-trajectory')).toBeVisible();
   await shot(page, 'ews', '01-lookup-risk-tier');

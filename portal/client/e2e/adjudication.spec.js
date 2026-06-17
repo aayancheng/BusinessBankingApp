@@ -11,8 +11,7 @@ test('lookup shows a decision badge', async ({ page }) => {
   const id = await firstId(page);
   await page.goto('/');
   await page.getByTestId('nav-lookup').click();
-  await page.getByTestId('applicant-input').fill(id);
-  await page.getByTestId('applicant-lookup').click();
+  await page.getByTestId('applicant-input').selectOption({ index: 1 });
   await expect(page.getByTestId('decision-badge')).toBeVisible();
   await expect(page.getByTestId('decision-badge')).toHaveText(/Approve|Refer|Decline/);
   await shot(page, 'adjudication', '01-lookup-decision');

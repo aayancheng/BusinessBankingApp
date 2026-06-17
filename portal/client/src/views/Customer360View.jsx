@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import Card from '../components/Card';
+import EntitySelect from '../components/EntitySelect';
 import DecisionBadge from '../components/DecisionBadge';
 import PassFailBadge from '../components/PassFailBadge';
 import RiskTierBadge from '../components/RiskTierBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
+import { useExamples } from '../lib/hooks';
 
-const SEED_ID = 'BIZ100000';
 const usd = (n) => `$${Math.round(n).toLocaleString()}`;
 const pct = (n) => `${(n * 100).toFixed(1)}%`;
 
@@ -20,11 +21,18 @@ function NotBooked({ title }) {
 
 export default function Customer360View({ hook }) {
   const { data, error, loading, lookup } = hook;
-  const [id, setId] = useState(SEED_ID);
+  const [id, setId] = useState('');
+  const examples = useExamples();
+  const options = examples?.customer360 || [];
 
-  useEffect(() => { lookup(SEED_ID); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const submit = (e) => { e.preventDefault(); lookup(id.trim()); };
+  // Seed an on-book example first so all five modules light up on open.
+  useEffect(() => {
+    if (!id && options.length > 0) {
+      const seed = options.find((o) => o.hint.includes('on book')) || options[0];
+      setId(seed.id);
+      lookup(seed.id);
+    }
+  }, [options]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-testid="view-customer360" className="space-y-5">
@@ -35,19 +43,8 @@ export default function Customer360View({ hook }) {
         </p>
       </div>
 
-      <form onSubmit={submit} className="flex gap-2">
-        <input
-          data-testid="c360-input"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          placeholder="Business ID (e.g. BIZ100000)"
-          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        />
-        <button data-testid="c360-load" type="submit"
-                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
-          Load
-        </button>
-      </form>
+      <EntitySelect value={id} options={options} onChange={setId} onLookup={lookup}
+                    placeholder="Select a business…" />
 
       {loading && <LoadingSpinner />}
       {error && <ErrorBanner message={error.message || 'No business found for that id'} />}
