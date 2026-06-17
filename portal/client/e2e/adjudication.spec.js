@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { shot } from './_shot.js';
 
 async function firstId(page) {
   const r = await page.request.get('http://localhost:8100/api/adjudication/applications?per_page=1');
@@ -14,6 +15,7 @@ test('lookup shows a decision badge', async ({ page }) => {
   await page.getByTestId('applicant-lookup').click();
   await expect(page.getByTestId('decision-badge')).toBeVisible();
   await expect(page.getByTestId('decision-badge')).toHaveText(/Approve|Refer|Decline/);
+  await shot(page, 'adjudication', '01-lookup-decision');
 });
 
 test('what-if updates a decision when a slider changes', async ({ page }) => {
@@ -23,10 +25,12 @@ test('what-if updates a decision when a slider changes', async ({ page }) => {
   const slider = page.getByTestId('slider-dscr');
   await slider.fill('0.4');           // force unaffordable → Decline
   await expect(page.getByTestId('decision-badge')).toHaveText(/Decline/, { timeout: 5000 });
+  await shot(page, 'adjudication', '02-whatif-decline');
 });
 
 test('segments renders a chart', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('nav-segments').click();
   await expect(page.getByTestId('segments-chart').first()).toBeVisible();
+  await shot(page, 'adjudication', '03-segments-chart');
 });
