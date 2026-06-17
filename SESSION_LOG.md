@@ -585,3 +585,19 @@ The corrected grand total including those early phases:
 
 Full breakdown (per module, impl/review split, by-model where recorded) is in
 [`TOKEN_SPEND.md`](TOKEN_SPEND.md).
+
+---
+
+## Backlog (brainstormed 2026-06-17, not started) — "Decisioning Platform" skill
+
+Brainstormed extracting this app's method into a **reusable skill for building business-analytics
+decisioning apps in any domain** (not just credit). The generalizable abstraction: *a shared
+entity score-spine + N decision apps + a unified portal, built synthetic-data-first, spec-driven,
+subagent-built, metric-gated.* Recommended shape: **Option C** — a thin playbook+scaffold skill
+that delegates the generic build cycle to the existing superpowers, plus one deep sub-skill
+(`synthetic-entity-data`) for the DGP/leakage/noise-cap judgment. Four open decisions and the full
+brainstorm are in
+[`docs/superpowers/specs/2026-06-17-decisioning-platform-skill-brainstorm.md`](docs/superpowers/specs/2026-06-17-decisioning-platform-skill-brainstorm.md).
+
+**To resume (new session):** open `BusinessBankingApp` and say *"build the decisioning-platform
+skill"* → `superpowers:brainstorming` to lock scope → spec → `superpowers:writing-skills`.
