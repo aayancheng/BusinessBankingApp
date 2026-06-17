@@ -567,3 +567,21 @@ project docs for handoff: refreshed `CLAUDE.md` (build-complete + run instructio
 `program_state.json` (status COMPLETE), and a GitHub `README.md` at repo root. Working tree
 clean. To run: `./.venv/bin/uvicorn portal.server.main:app --port 8100` + `(cd portal/client
 && npm run dev)` → http://localhost:5180.
+
+---
+
+## Program token spend — corrected grand total
+
+The "program cumulative" figures quoted per-session (ending ~3,156,869 at Session 7) **started
+counting from the Adjudication phase and omitted Foundation (~226K) + Score (~117K) = ~343K.**
+The corrected grand total including those early phases:
+
+- **≈ 3,499,869 subagent tokens** across **≈ 90 subagent dispatches**, 8 build sessions.
+- Most expensive module: **Adjudication ~942K** (backend 407K + portal 535K); then EWS ~713K,
+  Pricing ~674K. Cheapest substantive phase: Portal Integration ~366K. Session 8 dropdowns = 0
+  subagent tokens (controller-built inline).
+- **Caveat:** subagent tokens only — excludes unmeasured controller (main-thread) orchestration;
+  Foundation + Score are rounded estimates, all later phases are exact `subagent_tokens`.
+
+Full breakdown (per module, impl/review split, by-model where recorded) is in
+[`TOKEN_SPEND.md`](TOKEN_SPEND.md).

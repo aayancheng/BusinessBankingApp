@@ -17,6 +17,22 @@
   "resume_command": "Open the BusinessBankingApp workspace and say: 'resume the business banking build' (Claude reads program_state.json + the latest SESSION_LOG.md entry, prints the status board, and continues from next_action). To jump straight to the next module say: 'resume the business banking build — start Module 4 (Proactive Line Increase)'.",
   "verify_main_command": "cd /Users/aayan/zzLearnAndCreate/BusinessBankingApp && ./.venv/bin/pytest -q   (expect 104 passed on main); UI e2e: (cd portal/client && npx playwright test) expect 14; manual UI: ./.venv/bin/uvicorn portal.server.main:app --port 8100  +  (cd portal/client && npm run dev) -> http://localhost:5180 ; demo deck: open docs/deck/index.html (or serve docs/deck on a local http server)",
   "completed_phases": ["foundation", "score", "adjudication-backend", "adjudication-portal", "pricing", "portfolio_ews", "line_increase", "portal_integration", "lookup-dropdowns"],
+  "token_spend": {
+    "note": "SUBAGENT tokens only (excludes unmeasured controller/main-thread spend). Foundation+Score are rounded estimates; Adjudication onward are exact subagent_tokens. Full breakdown in TOKEN_SPEND.md.",
+    "grand_total_subagent_tokens": 3499869,
+    "total_dispatches": 90,
+    "by_phase": {
+      "foundation": 226000,
+      "score": 117000,
+      "adjudication_backend": 407229,
+      "adjudication_portal": 534797,
+      "pricing": 673580,
+      "ews": 712633,
+      "line_increase": 462931,
+      "portal_integration": 365699,
+      "lookup_dropdowns": 0
+    }
+  },
   "next_action": "NONE — program complete and merged to main (104 pytest + 14 e2e + vite build green). To run: ./.venv/bin/uvicorn portal.server.main:app --port 8100  +  (cd portal/client && npm run dev) -> http://localhost:5180. Optional future enhancements (all deferred, none required): (a) EWS deterioration target is noise-capped (oracle ~0.70); ews/docs/enhancement_notes.md Option A still deferred. (b) recharts/shap make the vite bundle ~622kB (informational warning only). (c) no git remote configured yet — README.md is ready for the first GitHub push.",
   "phases": [
     {
