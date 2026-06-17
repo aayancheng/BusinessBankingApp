@@ -21,10 +21,10 @@
     {
       "id": "decisioning-platform-skill",
       "title": "Generalize this app into a reusable 'decisioning platform' skill (any business domain, not just credit)",
-      "status": "brainstormed-not-started",
+      "status": "BUILT-AND-DEPLOYED 2026-06-17",
       "resume_phrase": "build the decisioning-platform skill",
-      "notes": "docs/superpowers/specs/2026-06-17-decisioning-platform-skill-brainstorm.md",
-      "recommendation": "Option C — thin playbook+scaffold skill that delegates the generic cycle to superpowers (brainstorming/writing-plans/subagent-driven-development), plus one deep sub-skill 'synthetic-entity-data' for the DGP/leakage/noise-cap reasoning. Next step: superpowers:brainstorming to lock 4 open decisions, then a real spec, then superpowers:writing-skills."
+      "spec": "docs/superpowers/specs/2026-06-17-decisioning-platform-skill-design.md (brainstorm: 2026-06-17-decisioning-platform-skill-brainstorm.md)",
+      "deliverables": "Two personal skills authored via superpowers:writing-skills (TDD: RED baseline → GREEN verify, both passed) and live at ~/.claude/skills/ : (1) decisioning-platform/ (SKILL.md + references/decision-app-archetypes.md + references/reference-implementation-map.md) — the multi-module platform playbook (slot model, manifest, 4 archetypes, portal conventions, governance gates), delegates the generic cycle to superpowers; (2) synthetic-entity-data/SKILL.md — the DGP/leakage/oracle-ceiling/pure-leaf discipline. This BusinessBankingApp is their reference implementation. NOTE: ~/.claude is NOT a git repo, so the skills are not version-controlled (like analytics-project.md). Option to copy them into a repo for backup/sharing if desired."
     }
   ],
   "token_spend": {

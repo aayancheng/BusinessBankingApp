@@ -601,3 +601,34 @@ brainstorm are in
 
 **To resume (new session):** open `BusinessBankingApp` and say *"build the decisioning-platform
 skill"* → `superpowers:brainstorming` to lock scope → spec → `superpowers:writing-skills`.
+
+---
+
+## Session 9 — 2026-06-17 — Built the "decisioning-platform" skill (+ synthetic-entity-data)
+
+Resumed the backlog. Locked the 4 open decisions (via `superpowers:brainstorming`): Option C
+(thin playbook delegating to superpowers); **delivery = guidance + reference implementation**
+(no codegen — this app is the reference impl, like MarketingAnalytics is for `analytics-project`);
+**platform manifest** to parameterize a build; **standalone** higher-order skill sibling to the
+existing single-model `analytics-project`. Spec:
+`docs/superpowers/specs/2026-06-17-decisioning-platform-skill-design.md`.
+
+Authored with `superpowers:writing-skills` (TDD-for-skills): **RED** baselines (no skill) showed
+the gaps — the synthetic-data baseline set its gate from economics/intuition without measuring the
+achievable ceiling; the platform baseline (architecture inflated by this repo's CLAUDE.md being in
+context) still missed the manifest, named archetypes, and governance depth. Wrote both skills,
+then **GREEN**-verified each with-skill: the data skill now computes the oracle ceiling two ways
+before gating + leakage deny-list; the platform skill now emits the manifest, archetype mapping,
+delegation to superpowers, and the full governance set (leakage/honest-gate/BLOCK-escalate/
+back-compat-re-run/stop-before-merge).
+
+**Deployed** (live in the skills list) at `~/.claude/skills/`:
+- `decisioning-platform/` — `SKILL.md` + `references/{decision-app-archetypes,reference-implementation-map}.md`
+- `synthetic-entity-data/SKILL.md`
+
+Note: `~/.claude` is not a git repo, so the skills are not version-controlled (same as
+`analytics-project.md`). Option open to copy them into a repo for backup/sharing.
+
+**Subagent token tally (Session 9):** 4 dispatches / ~75,164 tokens — RED baselines: synthetic
+17,687 + platform 19,241; GREEN verifies: synthetic 18,019 + platform 20,217. (Authoring done by
+the controller inline.)
