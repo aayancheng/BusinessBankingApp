@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Banking — Built with Claude Code</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-dark:    #0f172a;
+    --bg-dark2:   #1e293b;
+    --bg-light:   #f8fafc;
+    --bg-card:    #ffffff;
+    --text-dark:  #0f172a;
+    --text-light: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-body:  #334155;
+    --accent:     #10b981;
+    --accent2:    #059669;
+    --accent-dim: #d1fae5;
+    --border:     #e2e8f0;
+    --slate-mid:  #475569;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0a0f1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  /* ── Deck shell ── */
+  #deck {
+    position: relative;
+    width: 100%;
+    max-width: 1120px;
+    aspect-ratio: 16/9;
+    background: var(--bg-light);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,.7);
+  }
+
+  /* ── Slides ── */
+  .slide {
+    display: none;
+    position: absolute;
+    inset: 0;
+    padding: 56px 72px;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; flex-direction: column; justify-content: center; }
+  .slide.dark { background: var(--bg-dark); color: var(--text-light); }
+  .slide.light { background: var(--bg-light); color: var(--text-body); }
+
+  /* ── Typography ── */
+  .label {
+    font-size: .75rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+  }
+  h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.1; }
+  h2 { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+  .subtitle { font-size: 1.2rem; color: var(--text-muted); margin-top: 18px; max-width: 640px; line-height: 1.5; }
+  .body-text { font-size: 1rem; line-height: 1.7; color: var(--text-body); }
+  .footnote { font-size: .8rem; color: var(--text-muted); margin-top: auto; padding-top: 24px; }
+  .big-num { font-size: 3.6rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .big-num-dark { font-size: 3.6rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .metric-label { font-size: .85rem; color: var(--slate-mid); margin-top: 4px; }
+
+  /* ── Cards / grid helpers ── */
+  .card-grid { display: grid; gap: 18px; margin-top: 28px; }
+  .card-grid-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .card.accent-top { border-top: 3px solid var(--accent); }
+  .card h3 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+  .card p  { font-size: .9rem; color: var(--text-body); line-height: 1.55; }
+
+  /* ── Dark card ── */
+  .card-dark {
+    background: var(--bg-dark2);
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 20px 24px;
+    color: var(--text-light);
+  }
+  .card-dark h3 { font-size: .95rem; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+  .card-dark p  { font-size: .85rem; color: #94a3b8; line-height: 1.5; }
+
+  /* ── Slide 2: Spine diagram ── */
+  .spine-wrap { display: flex; align-items: center; gap: 32px; margin-top: 28px; }
+  .spine-core {
+    background: var(--bg-dark2);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-align: center;
+    min-width: 200px;
+    flex-shrink: 0;
+  }
+  .spine-core .sc-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); }
+  .spine-core .sc-name  { font-size: 1.15rem; font-weight: 800; color: var(--text-light); margin: 6px 0; }
+  .spine-core .sc-stat  { font-size: .82rem; color: #94a3b8; }
+  .spine-connector { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+  .spine-arrow { width: 48px; height: 2px; background: var(--accent); position: relative; }
+  .spine-arrow::after {
+    content: ""; position: absolute; right: -1px; top: -4px;
+    border: 5px solid transparent; border-left: 7px solid var(--accent);
+  }
+  .app-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+  .branch-card {
+    background: var(--bg-dark2);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+  }
+  .branch-card .bc-name { font-size: .9rem; font-weight: 700; color: var(--text-light); }
+  .branch-card .bc-stat { font-size: .78rem; color: #94a3b8; margin-top: 3px; }
+
+  /* ── Slide 8: Build pipeline ── */
+  .pipeline { display: flex; align-items: center; gap: 0; margin: 28px 0; }
+  .pipe-step {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-dark2); border: 1px solid #334155;
+    border-radius: 8px; padding: 14px 18px; min-width: 100px;
+    text-align: center;
+  }
+  .pipe-step .ps-icon { font-size: 1.5rem; }
+  .pipe-step .ps-label { font-size: .82rem; font-weight: 700; color: var(--accent); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+  .pipe-arrow { width: 28px; height: 2px; background: #475569; position: relative; flex-shrink: 0; }
+  .pipe-arrow::after {
+    content: ""; position: absolute; right: -1px; top: -4px;
+    border: 5px solid transparent; border-left: 7px solid #475569;
+  }
+  .escalation-box {
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin-top: 20px;
+  }
+  .escalation-box .esc-label { font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .escalation-box p { font-size: .95rem; color: #d1fae5; line-height: 1.6; margin-top: 6px; }
+
+  /* ── Slide 9: verification ── */
+  .verify-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 28px; }
+  .vcard {
+    background: var(--bg-dark2);
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 22px 24px;
+    text-align: center;
+  }
+  .vcard .vc-num { font-size: 2.8rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .vcard .vc-label { font-size: .85rem; color: #94a3b8; margin-top: 8px; }
+  .status-pill {
+    display: inline-block;
+    background: #064e3b;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
+  /* ── Metrics row ── */
+  .metrics-row { display: flex; gap: 32px; margin-top: 28px; flex-wrap: wrap; }
+  .metric-item { display: flex; flex-direction: column; }
+
+  /* ── Tag chips ── */
+  .chip {
+    display: inline-block;
+    background: var(--accent-dim);
+    color: #065f46;
+    border-radius: 100px;
+    padding: 3px 12px;
+    font-size: .78rem;
+    font-weight: 700;
+    margin-right: 6px; margin-top: 6px;
+  }
+  .chip-dark {
+    display: inline-block;
+    background: #064e3b;
+    color: var(--accent);
+    border-radius: 100px;
+    padding: 3px 12px;
+    font-size: .78rem;
+    font-weight: 700;
+    margin-right: 6px; margin-top: 6px;
+  }
+
+  /* ── Controls ── */
+  #controls {
+    display: flex; align-items: center; gap: 20px;
+    margin-top: 20px;
+  }
+  .ctrl-btn {
+    background: #1e293b;
+    color: #f1f5f9;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .ctrl-btn:hover { background: #334155; border-color: var(--accent); }
+  .ctrl-btn:disabled { opacity: .35; cursor: default; }
+  #counter { font-size: .95rem; color: #94a3b8; min-width: 60px; text-align: center; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- SLIDE 1: TITLE (dark) -->
+  <div class="slide dark active">
+    <div class="label">Claude Code · Teaching Demo</div>
+    <h1>Business Banking,<br>Built with Claude Code</h1>
+    <p class="subtitle">Five decision apps over one synthetic credit score —<br>spec → plan → build → verify.</p>
+    <div class="footnote">Prototype · fully synthetic data · no proprietary information</div>
+  </div>
+
+  <!-- SLIDE 2: THE SPINE -->
+  <div class="slide dark">
+    <div class="label">Architecture</div>
+    <h2>One Spine, Four Decision Apps</h2>
+    <div class="spine-wrap">
+      <div class="spine-core">
+        <div class="sc-title">Shared Spine</div>
+        <div class="sc-name">Business Credit Score</div>
+        <div class="sc-stat">WoE + logistic scorecard</div>
+        <div class="sc-stat" style="margin-top:8px;color:var(--accent);font-weight:700;">AUC 0.818 · KS 0.495</div>
+        <div class="sc-stat" style="margin-top:10px;">12,000 synthetic businesses</div>
+        <div class="sc-stat">200,064 rows · 24-month panel</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+        <div style="width:2px;height:100%;background:var(--accent);flex:1;min-height:120px;margin:0 24px;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;width:32px;flex-shrink:0;">
+        <div style="width:48px;height:2px;background:var(--accent);position:relative;">
+          <div style="position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left:7px solid var(--accent);"></div>
+        </div>
+      </div>
+      <div class="app-branches">
+        <div class="branch-card"><div class="bc-name">Adjudication</div><div class="bc-stat">LightGBM · AUC 0.810</div></div>
+        <div class="branch-card"><div class="bc-name">Pricing &amp; Profitability</div><div class="bc-stat">EL pricing · ROE/RAROC waterfall</div></div>
+        <div class="branch-card"><div class="bc-name">Early Warning</div><div class="bc-stat">Behavioral panel · top-decile 2.16×</div></div>
+        <div class="branch-card"><div class="bc-name">Proactive Line Increase</div><div class="bc-stat">Candidate model · AUC 0.813</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: ADJUDICATION -->
+  <div class="slide light">
+    <div class="label">App 1</div>
+    <h2>Adjudication</h2>
+    <div class="metrics-row">
+      <div class="metric-item"><div class="big-num">0.810</div><div class="metric-label">AUC (LightGBM)</div></div>
+      <div class="metric-item"><div class="big-num">2.86×</div><div class="metric-label">Top-20% Lift</div></div>
+    </div>
+    <div class="card-grid card-grid-3" style="margin-top:28px;">
+      <div class="card accent-top">
+        <h3>Approve</h3>
+        <p>High-score applicants auto-approved with SHAP feature attribution in the response payload.</p>
+      </div>
+      <div class="card accent-top">
+        <h3>Refer</h3>
+        <p>Mid-band cases flagged with top-3 reason codes for human review.</p>
+      </div>
+      <div class="card accent-top">
+        <h3>Decline</h3>
+        <p>Low-score declines returned with adverse-action reason codes compliant with policy layer.</p>
+      </div>
+    </div>
+    <div class="footnote">Model: LightGBM + calibration · Feature set: financial ratios, bureau tradelines, behavioral panel</div>
+  </div>
+
+  <!-- SLIDE 4: PRICING & PROFITABILITY -->
+  <div class="slide light">
+    <div class="label">App 2</div>
+    <h2>Pricing &amp; Profitability</h2>
+    <div class="metrics-row">
+      <div class="metric-item"><div class="big-num">30.4%</div><div class="metric-label">Loans clearing 15% ROE hurdle<br>at quoted rate</div></div>
+    </div>
+    <div class="card-grid card-grid-2" style="margin-top:28px;">
+      <div class="card accent-top">
+        <h3>EL-Based Pricing Engine</h3>
+        <p>Expected Loss = PD × LGD × EAD. Rate floor computed per obligor; margin over cost-of-funds sized to hit target ROE.</p>
+      </div>
+      <div class="card accent-top">
+        <h3>ROE / RAROC Waterfall</h3>
+        <p>Revenue → credit loss → funding cost → OpEx → capital charge. Full decomposition surfaced in the API response and portal dashboard.</p>
+      </div>
+    </div>
+    <div class="footnote">Headline stat: only 30.4% of booked loans clear the 15% ROE hurdle at the quoted rate — key insight for repricing decisions.</div>
+  </div>
+
+  <!-- SLIDE 5: EARLY WARNING -->
+  <div class="slide light">
+    <div class="label">App 3</div>
+    <h2>Early Warning System</h2>
+    <div class="metrics-row">
+      <div class="metric-item"><div class="big-num">2.16×</div><div class="metric-label">Top-decile capture rate</div></div>
+      <div class="metric-item"><div class="big-num">0.308</div><div class="metric-label">PR-AUC</div></div>
+    </div>
+    <div class="card-grid card-grid-2" style="margin-top:28px;">
+      <div class="card accent-top">
+        <h3>Behavioral Panel Model</h3>
+        <p>24-month rolling behavioral features: utilization trend, payment velocity, covenant headroom. Month-over-month deterioration signals.</p>
+      </div>
+      <div class="card accent-top">
+        <h3>Risk-Tier Watchlist</h3>
+        <p>Businesses scored monthly; top-decile movers surfaced on the portal watchlist for RM outreach. Tier transitions tracked in the Customer 360.</p>
+      </div>
+    </div>
+    <div class="footnote">Note: PR-AUC reflects genuine class imbalance in synthetic data — a key BLOCK escalation point (slide 8).</div>
+  </div>
+
+  <!-- SLIDE 6: PROACTIVE LINE INCREASE -->
+  <div class="slide light">
+    <div class="label">App 4</div>
+    <h2>Proactive Line Increase</h2>
+    <div class="metrics-row">
+      <div class="metric-item"><div class="big-num">0.813</div><div class="metric-label">AUC (candidate model)</div></div>
+      <div class="metric-item"><div class="big-num">0.036</div><div class="metric-label">Offered cohort PD</div></div>
+      <div class="metric-item"><div class="big-num">0.215</div><div class="metric-label">Aggregate incremental ROE</div></div>
+    </div>
+    <div class="card-grid card-grid-2" style="margin-top:24px;">
+      <div class="card accent-top">
+        <h3>Candidate Selection</h3>
+        <p>Book PD 0.117 → offered cohort PD 0.036. Model identifies utilization headroom + credit quality before proposing increases.</p>
+      </div>
+      <div class="card accent-top">
+        <h3>Incremental-ROE Gate</h3>
+        <p>Each candidate must clear ≥ 0.15 incremental ROE hurdle. Aggregate portfolio result: 0.215 — comfortably above the gate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: CUSTOMER 360 -->
+  <div class="slide light">
+    <div class="label">Integration</div>
+    <h2>Customer 360</h2>
+    <p class="body-text" style="margin-top:16px;">All five modules surfaced for one business from a single API call — the integration payoff of building over a shared spine.</p>
+    <div class="card" style="margin-top:24px;padding:20px 28px;font-family:monospace;font-size:.95rem;background:#0f172a;color:#d1fae5;border-radius:10px;border:1px solid #334155;">
+      GET /api/customer/{id}
+    </div>
+    <div class="card-grid card-grid-3" style="margin-top:18px;">
+      <div class="card"><h3>Credit Score</h3><p>Raw score + WoE band + percentile rank in book.</p></div>
+      <div class="card"><h3>Adjudication</h3><p>Decision + SHAP top-3 drivers + reason codes.</p></div>
+      <div class="card"><h3>Pricing</h3><p>Quoted rate + ROE waterfall decomposition.</p></div>
+      <div class="card"><h3>Early Warning</h3><p>Risk tier + month-over-month trajectory + flag.</p></div>
+      <div class="card"><h3>Line Increase</h3><p>Candidate flag + incremental ROE + recommended delta.</p></div>
+      <div class="card"><h3>Cached Populations</h3><p>Single-call assembly from pre-scored populations — no model re-run at request time.</p></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: HOW IT WAS BUILT (climax) -->
+  <div class="slide dark">
+    <div class="label">The Teaching Message</div>
+    <h2>How It Was Built: plan → execute → verify</h2>
+    <div class="pipeline">
+      <div class="pipe-step"><div class="ps-icon">💡</div><div class="ps-label">Brainstorm</div></div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-step"><div class="ps-icon">📐</div><div class="ps-label">Spec</div></div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-step"><div class="ps-icon">🗂</div><div class="ps-label">Plan</div></div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-step"><div class="ps-icon">🤖</div><div class="ps-label">Subagents</div></div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-step"><div class="ps-icon">🔍</div><div class="ps-label">Review ×2</div></div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-step"><div class="ps-icon">✅</div><div class="ps-label">Merge</div></div>
+    </div>
+    <div class="escalation-box">
+      <div class="esc-label">Governance Signal — Two Genuine BLOCK Escalations</div>
+      <p>EWS and Line-Increase both surfaced noise-capped synthetic targets where subagents <strong>refused to game a mathematically-unreachable metric gate</strong> — escalating to a human decision instead of silently accepting bad numbers. That governance behavior is the point: the system flags when a spec is unachievable rather than papering over it.</p>
+    </div>
+    <div style="margin-top:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <span class="chip-dark">70+ subagent dispatches</span>
+      <span class="chip-dark">7 build sessions</span>
+      <span class="chip-dark">spec-first every module</span>
+      <span class="chip-dark">2-stage code review</span>
+      <span class="chip-dark">resumable via program_state.json</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: VERIFICATION (climax) -->
+  <div class="slide dark">
+    <div class="label">Verification</div>
+    <h2>Green at Every Merge</h2>
+    <div class="verify-grid">
+      <div class="vcard">
+        <div class="vc-num">100+</div>
+        <div class="vc-label">Backend pytest assertions<br>across all modules</div>
+      </div>
+      <div class="vcard">
+        <div class="vc-num">E2E</div>
+        <div class="vc-label">Playwright end-to-end tests<br>with screenshots per module</div>
+      </div>
+      <div class="vcard">
+        <div class="vc-num">CI</div>
+        <div class="vc-label">vite build · every --no-ff merge<br>to main stays green</div>
+      </div>
+    </div>
+    <div class="card-dark" style="margin-top:24px;">
+      <h3>Resumable Source of Truth</h3>
+      <p><strong style="color:var(--text-light);">program_state.json</strong> is the task ledger — task status, next_action, and session checkpoints. Each session end: ledger updated, SESSION_LOG.md appended, commit tagged, resume command printed. The build can pause across daily token limits and resume exactly.</p>
+    </div>
+    <div style="margin-top:16px;">
+      <span class="status-pill">All tests green</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: CLOSE (dark) -->
+  <div class="slide dark">
+    <div class="label">Takeaway</div>
+    <h1>Speed-to-market<br>with Claude Code.</h1>
+    <p class="subtitle">Built module-by-module, spec-first, verified at every step —<br>on fully synthetic data. The development cycle is the demo.</p>
+    <div style="margin-top:36px;display:flex;gap:16px;flex-wrap:wrap;">
+      <span class="chip-dark">plan → execute → verify</span>
+      <span class="chip-dark">brainstorm → spec → subagents → review → merge</span>
+      <span class="chip-dark">governance by escalation, not suppression</span>
+    </div>
+    <div class="footnote">Prototype · fully synthetic data · no proprietary information · github: BusinessBankingApp</div>
+  </div>
+
+</div><!-- #deck -->
+
+<!-- Controls -->
+<div id="controls">
+  <button class="ctrl-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592; Prev</button>
+  <span id="counter">1 / 10</span>
+  <button class="ctrl-btn" id="nextBtn" onclick="navigate(1)">Next &#8594;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === total - 1;
+  }
+
+  function navigate(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); showSlide(0); }
+    else if (e.key === 'End')  { e.preventDefault(); showSlide(total - 1); }
+  });
+</script>
+</body>
+</html>
